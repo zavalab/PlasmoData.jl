@@ -1,0 +1,13 @@
+name = "DataGraphs"
+uuid = "61570925-d2eb-4b32-b37d-b99a9c94b618"
+authors = ["dlcole3 <dlcole3@wisc.edu> and contributors"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

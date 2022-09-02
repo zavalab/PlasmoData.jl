@@ -52,8 +52,9 @@ function matrix_to_graph(matrix, weight_name::String="weight")
         end
     end
 
-    g.ne              = length(edges)
-    g.fadjlist        = fadjlist
+    simple_graph = Graphs.SimpleGraph(length(edges), fadjlist)
+
+    g.g               = simple_graph
     g.nodes           = nodes
     g.node_map        = node_map
     g.edges           = edges
@@ -169,8 +170,9 @@ function filter_nodes(g::DataGraph, filter_val::Real; attribute::String=g.node_a
         new_g.edge_data    = new_edge_data
     end
 
-    new_g.ne              = length(new_edges)
-    new_g.fadjlist        = fadjlist
+    simple_graph = Graphs.SimpleGraph(T(length(edges)), fadjlist)
+
+    new_g.g               = simple_graph
     new_g.nodes           = new_nodes
     new_g.edges           = new_edges
     new_g.edge_map        = new_edge_index
@@ -221,13 +223,14 @@ function filter_edges(g::DataGraph, filter_val::Real; attribute::String = g.edge
 
     new_g = DataGraph()
 
-    new_g.ne              = T(length(new_edges))
-    new_g.fadjlist        = fadjlist
+    simple_graph = Graphs.SimpleGraph(T(length(edges)), fadjlist)
+
+    new_g.g               = simple_graph
     new_g.nodes           = nodes
     new_g.edges           = new_edges
     new_g.edge_data       = new_edge_data
     new_g.node_map        = node_map
-    new_g.edge_map     = new_edge_index
+    new_g.edge_map        = new_edge_index
     new_g.node_attributes = node_attributes
     new_g.edge_attributes = edge_attributes
     new_g.node_positions  = g.node_positions
@@ -459,11 +462,12 @@ function aggregate(g::DataGraph, node_set, new_name)
         new_g.edge_data       = new_edge_data
     end
 
-    new_g.ne          = length(new_edges)
-    new_g.fadjlist    = fadjlist
-    new_g.nodes       = new_nodes
+    simple_graph = Graphs.SimpleGraph(T(length(edges)), fadjlist)
+
+    new_g.g        = simple_graph
+    new_g.nodes    = new_nodes
     new_g.node_map = new_node_dict
-    new_g.edges       = new_edges
+    new_g.edges    = new_edges
     new_g.edge_map = new_edge_map
 
     return new_g

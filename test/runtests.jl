@@ -12,7 +12,7 @@ end
 @testset "add_node! test" begin
     @test length(dg.nodes) == length(nodes)
     @test dg.nodes == nodes
-    @test length(dg.fadjlist) == length(nodes)
+    @test length(dg.g.fadjlist) == length(nodes)
     @test length(dg.node_map) == length(nodes)
     for (i, node) in enumerate(nodes)
         @test dg.node_map[node] == i
@@ -30,6 +30,7 @@ end
 @testset "add_edge! test" begin
     @test length(dg.edges) == length(edges)
     @test length(dg.edge_map) == length(edges)
+    @test length(dg.edges) == dg.g.ne
 
     node_map = dg.node_map
     for (i, edge) in enumerate(edges)
@@ -37,7 +38,7 @@ end
         node2 = node_map[edge[2]]
 
         @test ((node1, node2) == dg.edges[i] || (node2, node1) == dg.edges[i])
-        @test node2 in dg.fadjlist[node1]
-        @test node1 in dg.fadjlist[node2]
+        @test node2 in dg.g.fadjlist[node1]
+        @test node1 in dg.g.fadjlist[node2]
     end
 end

@@ -1,3 +1,3 @@
-# DataGraphs.jl
+# DataGraphs
 
-This project is currently under development
+This Project is under development

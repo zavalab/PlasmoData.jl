@@ -1,8 +1,7 @@
 abstract type AbstractDataGraph{T} <: Graphs.AbstractGraph{T} end
 
 mutable struct DataGraph{T} <: AbstractDataGraph{T}
-    ne::Int
-    fadjlist::Vector{Vector{T}}
+    g::Graphs.SimpleGraph{T}
 
     nodes::Vector{Any}
     edges::Vector{Tuple{T, T}}
@@ -18,7 +17,7 @@ mutable struct DataGraph{T} <: AbstractDataGraph{T}
 end
 
 function Base.eltype(datagraph::DataGraph)
-    return eltype(eltype(datagraph.fadjlist))
+    return eltype(eltype(datagraph.g.fadjlist))
 end
 
 function DataGraph(nodes::Vector{Any} = Vector{Any}(), edges::Vector{Tuple{T, T}} = Vector{Tuple{Int, Int}}(),
@@ -43,8 +42,10 @@ function DataGraph(nodes::Vector{Any} = Vector{Any}(), edges::Vector{Tuple{T, T}
         error("node_map does not match the number of nodes")
     end
 
+    g = SimpleGraph(ne, fadjlist)
+
     DataGraph{T}(
-        ne, fadjlist, nodes, edges, node_map, edge_map,
+        g, nodes, edges, node_map, edge_map,
         node_attributes, edge_attributes, node_data, edge_data,
         node_positions
     )
@@ -65,8 +66,10 @@ function DataGraph()
     edge_data = []
     node_positions = [[0.0 0.0]]
 
+    g = SimpleGraph(ne, fadjlist)
+
     DataGraph{Int}(
-        ne, fadjlist, nodes, edges, node_map, edge_map,
+        g, nodes, edges, node_map, edge_map,
         node_attributes, edge_attributes, node_data, edge_data,
         node_positions
     )
@@ -97,7 +100,7 @@ function add_node!(g::DataGraph,node_name::Any)
     # otherwise, print that the node exists and don't do anything
     if !(node_name in nodes)
         push!(nodes,node_name)
-        push!(g.fadjlist, Vector{T}())
+        push!(g.g.fadjlist, Vector{T}())
 
         # If there are data currently defined on the other nodes, add a NaN value to
         # the end of the weight array for the new node
@@ -119,8 +122,6 @@ function add_node!(g::DataGraph,node_name::Any)
        return false
     end
 end
-
-
 
 """
     add_edge!(g, node_1, node_2)
@@ -152,13 +153,13 @@ function add_edge!(g::DataGraph, node1::Any, node2::Any)
     # If the edge isn't already defined, then add the edge; add to weight arrays too
     if !(edge in edges)
         push!(edges, edge)
-        g.ne += 1
+        g.g.ne += 1
 
-        @inbounds node_neighbors = g.fadjlist[node1_index]
+        @inbounds node_neighbors = g.g.fadjlist[node1_index]
         index = searchsortedfirst(node_neighbors, node2_index)
         insert!(node_neighbors, index, node2_index)
 
-        @inbounds node_neighbors = g.fadjlist[node2_index]
+        @inbounds node_neighbors = g.g.fadjlist[node2_index]
         index = searchsortedfirst(node_neighbors, node1_index)
         insert!(node_neighbors, index, node1_index)
 
