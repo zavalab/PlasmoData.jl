@@ -1,6 +1,6 @@
-function get_EC(g::DataGraph)
-    nodes = g.nodes
-    edges = g.edges
+function get_EC(dg::DataGraph)
+    nodes = dg.nodes
+    edges = dg.edges
 
     EC = length(nodes) - length(edges)
 
@@ -10,21 +10,21 @@ end
 function matrix_to_graph(matrix, weight_name::String="weight")
 
     dim1, dim2 = size(matrix)
-    g = DataGraph()
+    dg = DataGraph()
 
-    fadjlist  = [Vector{Int}() for i in 1:(dim1 * dim2)]
-    edges     = Vector{Tuple{Int, Int}}()
-    nodes     = Vector{Any}()
-    node_map  = Dict{Any, Int}()
-    edge_map  = Dict{Tuple{Int, Int}, Int}()
-    node_data = NamedArrays.NamedArray(fill(NaN, (dim1*dim2,1)))
-    setnames!(node_data, [weight_name], 2)
+    fadjlist  = dg.g.fadjlist#[Vector{Int}() for i in 1:(dim1 * dim2)]
+    edges     = dg.edges#Vector{Tuple{Int, Int}}()
+    nodes     = dg.nodes#Vector{Any}()
+    node_map  = dg.node_map#Dict{Any, Int}()
+    edge_map  = dg.edge_map#Dict{Tuple{Int, Int}, Int}()
+    node_data = fill(NaN, (dim1*dim2, 1))
 
     for j in 1:dim2
         for i in 1:dim1
+            index = i + (j - 1) * dim2
             push!(nodes, (i, j))
             node_map[(i, j)] = length(nodes)
-            node_data[length(nodes), weight_name] = matrix[i, j]
+            node_data[index, weight_name] = matrix[i, j]
         end
     end
 
@@ -47,20 +47,20 @@ function matrix_to_graph(matrix, weight_name::String="weight")
                     push!(edges, edge)
                     edge_map[edge] = length(edges)
                 end
-
             end
         end
     end
 
     simple_graph = Graphs.SimpleGraph(length(edges), fadjlist)
+    dg.node_data.attributes               = [attribute]
+    dg.node_data.attribute_map[attribute] = 1
 
-    g.g               = simple_graph
-    g.nodes           = nodes
-    g.node_map        = node_map
-    g.edges           = edges
-    g.edge_map        = edge_map
-    g.node_data       = node_data
-    g.node_attributes = [weight_name]
+    dg.g               = simple_graph
+    dg.nodes           = nodes
+    dg.node_map        = node_map
+    dg.edges           = edges
+    dg.edge_map        = edge_map
+    dg.node_data.data  = node_data
 
     return g
 end

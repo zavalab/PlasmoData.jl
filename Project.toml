@@ -3,8 +3,20 @@ uuid = "61570925-d2eb-4b32-b37d-b99a9c94b618"
 authors = ["dlcole3 <dlcole3@wisc.edu> and contributors"]
 version = "0.1.0"
 
+[deps]
+GeometryBasics = "5c1252a2-5f33-56bf-86c9-59e7332b4326"
+Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
+NetworkLayout = "46757867-2c16-5918-afeb-47bfcb05e46a"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+
 [compat]
-julia = "1"
+GeometryBasics = "0.4.3"
+Graphs = "1.7.2"
+NetworkLayout = "0.4.4"
+Plots = "1.31.7"
+julia = "^1.7.0"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

@@ -4,7 +4,6 @@ using Graphs
 using SparseArrays
 using Statistics
 using GeometryBasics
-using NamedArrays
 using Plots
 using NetworkLayout
 
