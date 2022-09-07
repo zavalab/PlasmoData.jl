@@ -1,7 +1,5 @@
 abstract type AbstractDataGraph{T} <: Graphs.AbstractGraph{T} end
 
-export DataGraph, add_node!, add_edge!, add_node_data!, add_edge_data!, create_adj_mat
-
 mutable struct NodeData{T, M}
     attributes::Vector{String}
     attribute_map::Dict{String, Int}
@@ -190,7 +188,7 @@ end
 
 Add an edge to the graph, `g`. If the nodes are not defined in the graph, they are added to the graph
 """
-function add_edge!(dg::DataGraph, node1::Any, node2::Any)
+function Graphs.add_edge!(dg::DataGraph, node1::Any, node2::Any)
     edges      = dg.edges
     nodes      = dg.nodes
     attributes = dg.edge_data.attributes

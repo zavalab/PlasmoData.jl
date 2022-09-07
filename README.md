@@ -1,3 +1,3 @@
 # DataGraphs
 
-This Project is under development
+This package is under development

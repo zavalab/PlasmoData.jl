@@ -1,3 +1,5 @@
+using Plots, NetworkLayout, GeometryBasics
+
 function plot_graph(g::DataGraph;
     get_new_positions::Bool=false,
     plot_edges::Bool=true,
@@ -12,7 +14,9 @@ function plot_graph(g::DataGraph;
     legend::Bool = false,
     color = :blue,
     markercolor = :black,
-    markersize = 5
+    markersize = 5,
+    save_fig::Bool = false,
+    fig_name::String = "plot.png"
 )
 
     plt_options = Dict(:framestyle => :box, :grid => false, :size => (xdim,ydim), :axis => nothing, :legend => legend)
@@ -36,6 +40,9 @@ function plot_graph(g::DataGraph;
 
             plot!(plt,[pos[from][1], pos[to][1]], [pos[from][2], pos[to][2]]; line_options...)
         end
+    end
+    if save_fig
+        Plots.savefig(fig_name)
     end
     display(plt)
 end

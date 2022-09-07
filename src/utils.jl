@@ -64,7 +64,7 @@ function matrix_to_graph(matrix, weight_name::String="weight")
     return dg
 end
 
-function sym_matrix_to_graph(matrix, weight_name::String="weight", tol = 1e-9)
+function symmetric_matrix_to_graph(matrix, weight_name::String="weight", tol = 1e-9)
 
     dim1, dim2 = size(matrix)
     if dim1 != dim2
@@ -79,7 +79,7 @@ function sym_matrix_to_graph(matrix, weight_name::String="weight", tol = 1e-9)
 
     for j in 1:dim2
         for i in j:dim1
-            add_edge!(dg, i, j)
+            Graphs.add_edge!(dg, i, j)
             add_edge_data!(dg, i, j, matrix[i,j], weight_name)
         end
     end

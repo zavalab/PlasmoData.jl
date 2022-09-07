@@ -5,9 +5,9 @@ using DataGraphs
 # Test add_node!
 nodes = [7, "node2", :node3, 17.5]
 
-dg = DataGraphs.DataGraph()
+dg = DataGraph()
 for i in nodes
-    DataGraphs.add_node!(dg, i)
+    add_node!(dg, i)
 end
 
 @testset "add_node! test" begin
@@ -25,7 +25,7 @@ end
 edges = [(17.5, 7), (:node3, "node2"), (7, :node3)]
 
 for (i, j) in edges
-    DataGraphs.add_edge!(dg, i, j)
+    add_edge!(dg, i, j)
 end
 
 @testset "add_edge! test" begin
@@ -42,4 +42,31 @@ end
         @test node2 in dg.g.fadjlist[node1]
         @test node1 in dg.g.fadjlist[node2]
     end
+end
+
+# Test add_node_data!
+
+node_data = [6.3, 7.2, 8.6, 4.3]
+
+add_node_data!(dg, nodes[2], node_data[2], "weight")
+add_node_data!(dg, nodes[4], node_data[4], "weight")
+add_node_data!(dg, nodes[1], node_data[1], "weight")
+add_node_data!(dg, nodes[3], node_data[3], "weight")
+
+@testset "add_node_data!" begin
+    @test dg.node_data.data[:, 1] == node_data
+    @test dg.node_data.attributes == ["weight"]
+end
+
+# Test add_edge_data!
+
+edge_data = [2.1, 3.5, 6.8]
+
+add_edge_data!(dg, edges[3][1], edges[3][2], edge_data[3], "weight")
+add_edge_data!(dg, edges[1][1], edges[1][2], edge_data[1], "weight")
+add_edge_data!(dg, edges[2][1], edges[2][2], edge_data[2], "weight")
+
+@testset "add_edge_data!" begin
+    @test dg.edge_data.data[:, 1] == edge_data
+    @test dg.edge_data.attributes == ["weight"]
 end
