@@ -1,5 +1,6 @@
+using Revise
 using Test
-include("../src/DataGraphs.jl")
+using DataGraphs
 
 # Test add_node!
 nodes = [7, "node2", :node3, 17.5]

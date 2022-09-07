@@ -263,6 +263,7 @@ function add_node_data!(dg::DataGraph, node::Any, node_weight::Number, attribute
         node_data = hcat(node_data, new_col)
         node_data[node_map[node], attribute_map[attribute]] = node_weight
         dg.node_data.data = node_data
+        return true
     else
         node_data[node_map[node], attribute_map[attribute]] = node_weight
         return true
@@ -302,9 +303,11 @@ function add_edge_data!(dg::DataGraph, node1::Any, node2::Any, edge_weight::Real
         edge_data = hcat(edge_data, new_col)
         edge_data[edge_map[edge], attribute_map[attribute]] = edge_weight
         dg.edge_data.data = edge_data
+        return true
     else
         edge_data = dg.edge_data.data
         edge_data[edge_map[edge], attribute_map[attribute]] = edge_weight
+        return true
     end
 end
 

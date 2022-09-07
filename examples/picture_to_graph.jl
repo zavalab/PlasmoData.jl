@@ -1,5 +1,7 @@
+using Revise
 using Colors, TestImages, Images, Plots
-include("../src/DataGraphs.jl")
+using DataGraphs
+
 img = Images.load("./examples/Bucky_Badger.jpg")
 #picture from https://www.wikiwand.com/en/Bucky_Badger
 
@@ -12,7 +14,7 @@ mat_graph.node_positions = DataGraphs.set_matrix_node_positions(mat_graph.nodes,
 
 #DataGraphs.plot_graph(mat_graph; plot_edges=false, markersize=.5, xdim = 500, ydim = 500)
 
-for i in 1:8
+for i in 1:3
     @time filtered_mat_graph = DataGraphs.filter_nodes(mat_graph, i*.125; attribute = "weight")
     println("done with filter on $i")
     DataGraphs.plot_graph(filtered_mat_graph, plot_edges = false, markersize = .5)

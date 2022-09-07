@@ -1,12 +1,13 @@
-include("../src/DataGraphs.jl")
-#include("matrix_test.jl")
-dg = DataGraphs.DataGraph()
+using Revise
+using DataGraphs, Graphs
 
-DataGraphs.add_node!(dg, 1)
-DataGraphs.add_node!(dg, 2)
-DataGraphs.add_node!(dg, 3)
-DataGraphs.add_node!(dg, "node4")
-DataGraphs.add_node!(dg, :node5)
+dg = DataGraph()
+
+add_node!(dg, 1)
+add_node!(dg, 2)
+add_node!(dg, 3)
+add_node!(dg, "node4")
+add_node!(dg, :node5)
 
 DataGraphs.add_node_data!(dg, 1, 7, "weight")
 DataGraphs.add_node_data!(dg, 2, 3.4, "weight")
