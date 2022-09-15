@@ -1,6 +1,6 @@
 using Revise
 using Colors, TestImages, Images
-using DataGraphs
+using DataGraphs, Graphs
 
 include("plots.jl")
 

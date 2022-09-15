@@ -29,7 +29,7 @@ function matrix_to_graph(matrix, weight_name::String="weight")
 
     if dim1 > 1 && dim2 > 1
         for j in 1:dim2
-            column_offset = dim2 * (j - 1)
+            column_offset = dim1 * (j - 1)
             for i in 1:dim1
                 if j != dim2
                     edge = (i + column_offset, i + column_offset + dim1)
@@ -67,11 +67,12 @@ end
 function symmetric_matrix_to_graph(matrix, weight_name::String="weight", tol = 1e-9)
 
     dim1, dim2 = size(matrix)
+
     if dim1 != dim2
         error("Matrix is not square")
     end
 
-    if all(isapprox.(matrix = matrix', 0; rtol = tol))
+    if all(isapprox.(matrix - matrix', 0; rtol = tol))
         error("Matrix is not symmetric")
     end
 
@@ -188,7 +189,7 @@ function filter_nodes(dg::DataGraph, filter_val::Real; attribute::String=g.node_
     return new_dg
 end
 
-function filter_edges(dg::DataGraph, filter_val::Real; attribute::String = g.edge_attributes[1])
+function filter_edges(dg::DataGraph, filter_val::Real; attribute::String = dg.edge_data.attributes[1])
     nodes           = dg.nodes
     edges           = dg.edges
     node_attributes = dg.node_data.attributes
@@ -205,7 +206,7 @@ function filter_edges(dg::DataGraph, filter_val::Real; attribute::String = g.edg
 
     T = eltype(dg)
 
-    bool_vec = dg.edge_data[:, edge_attribute_map[attribute]] .< filter_val
+    bool_vec = dg.edge_data.data[:, edge_attribute_map[attribute]] .< filter_val
 
     new_edges = edges[bool_vec]
     new_edge_data = edge_data[bool_vec, :]
@@ -246,12 +247,14 @@ function filter_edges(dg::DataGraph, filter_val::Real; attribute::String = g.edg
     new_dg.node_data.attribute_map = dg.node_data.attribute_map
     new_dg.edge_data.attribute_map = dg.edge_data.attribute_map
 
-    return new_g
+    return new_dg
 end
 
-function run_EC_on_nodes(dg::DataGraph, thresh; attribute::String = g.node_attributes[1])
+function run_EC_on_nodes(dg::DataGraph, thresh; attribute::String = dg.node_data.attributes[1])
     nodes        = dg.nodes
     node_data    = dg.node_data.data
+
+    node_attribute_map = dg.node_data.attribute_map
 
     am = create_adj_mat(dg)
 
@@ -264,7 +267,7 @@ function run_EC_on_nodes(dg::DataGraph, thresh; attribute::String = g.node_attri
     ECs = zeros(length(thresh))
 
     for (j,i) in enumerate(thresh)
-        bool_vec  = node_data[:, attribute] .< i
+        bool_vec  = node_data[:, node_attribute_map[attribute]] .< i
         new_am    = am[bool_vec, bool_vec]
         num_nodes = sum(bool_vec)
         num_edges = sum(new_am)/2
@@ -274,16 +277,17 @@ function run_EC_on_nodes(dg::DataGraph, thresh; attribute::String = g.node_attri
     return ECs
 end
 
-function run_EC_on_edges(dg::DataGraph, thresh; attribute::String = g.edge_attributes[1])
+function run_EC_on_edges(dg::DataGraph, thresh; attribute::String = dg.edge_data.attributes[1])
     edge_data = dg.edge_data.data
     nodes     = dg.nodes
+    edge_attribute_map = dg.edge_data.attribute_map
 
     ECs = zeros(length(thresh))
 
     num_nodes = length(nodes)
 
     for (j,i) in enumerate(thresh)
-        bool_vec  = edge_data[:, attribute] .< i
+        bool_vec  = edge_data[:, edge_attribute_map[attribute]].< i
         num_edges = sum(bool_vec)
         ECs[j]    = num_nodes - num_edges
     end

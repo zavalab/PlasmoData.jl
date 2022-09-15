@@ -122,7 +122,6 @@ function DataGraph{T, T1, T2, M1, M2}() where {T <: Integer, T1, T2,  M1 <: Matr
 
     node_data_struct = NodeData(node_attributes, node_attribute_map, node_data)
     edge_data_struct = EdgeData(edge_attributes, edge_attribute_map, edge_data)
-    println(typeof(node_data_struct))
 
     DataGraph{T, T1, T2, M1, M2}(
         g, nodes, edges, node_map, edge_map,
@@ -224,9 +223,9 @@ function Graphs.add_edge!(dg::DataGraph, node1::Any, node2::Any)
 
 
         if length(attributes)>0
-            edge_data = g.edge_data.data
+            edge_data  = dg.edge_data.data
             row_to_add = fill(NaN, (1, length(attributes)))
-            edge_data = vcat(edge_data, row_to_add)
+            edge_data  = vcat(edge_data, row_to_add)
             dg.edge_data.data = edge_data
         end
 
@@ -284,8 +283,6 @@ function add_edge_data!(dg::DataGraph, node1::Any, node2::Any, edge_weight::Real
     if !(edge in edges)
         error("edge does not exist in graph")
     end
-
-    println(dg.edge_data.data)
 
     if length(attributes) == 0
         edge_data = Array{eltype(dg.edge_data.data)}(undef, length(edges), 0)
