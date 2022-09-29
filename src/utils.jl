@@ -7,7 +7,7 @@ function get_EC(dg::DataGraph)
     return EC
 end
 
-function matrix_to_graph(matrix, weight_name::String="weight")
+function matrix_to_graph(matrix::AbstractMatrix, weight_name::String="weight")
 
     dim1, dim2 = size(matrix)
     dg = DataGraph()
@@ -93,10 +93,85 @@ function mvts_to_graph(mvts, weight_name::String="weight", tol=1e-9)
     mvts_cov  = cov(mvts)
     mvts_prec = inv(mvts_cov)
 
-    dg = sym_matrix_to_graph(mvts_prec, weight_name, tol)
+    dg = symmetric_matrix_to_graph(mvts_prec, weight_name, tol)
 
     return dg
 end
+
+function tensor_to_graph(tensor::AbstractArray, weight_name::String="weight")
+
+    if length(size(tensor)) != 3
+        error("Tensor must have 3 dimensions; given tensor has $(length(size(tensor))) dimensions")
+    end
+
+    dim1, dim2, dim3 = size(tensor)
+    dg = DataGraph()
+
+    fadjlist  = [Vector{Int}() for i in 1:(dim1 * dim2 * dim3)]
+    edges     = dg.edges
+    nodes     = dg.nodes
+    node_map  = dg.node_map
+    edge_map  = dg.edge_map
+    node_data = Array{eltype(tensor), 2}(undef, (dim1 * dim2 * dim3, 1)) #fill(NaN, (dim1*dim2, 1))
+
+    for k in 1:dim3
+        for j in 1:dim2
+            for i in 1:dim1
+                push!(nodes, (i, j, k))
+                node_map[(i, j, k)] = length(nodes)
+                node_data[length(nodes), 1] = tensor[i, j, k]
+            end
+        end
+    end
+
+    if dim1 > 1 && dim2 > 1 && dim3 > 1
+        for k in 1:dim3
+            dim3_offset = dim1 * dim2 * (k - 1)
+            for j in 1:dim2
+                column_offset = dim1 * (j - 1)
+                for i in 1:dim1
+                    if j != dim2
+                        edge = (i + column_offset + dim3_offset, i + column_offset + dim3_offset + dim1)
+                        push!(edges, edge)
+                        push!(fadjlist[i + column_offset + dim3_offset], i + column_offset + dim3_offset + dim1)
+                        push!(fadjlist[i + column_offset + dim3_offset + dim1], i + column_offset + dim3_offset)
+                        edge_map[edge] = length(edges)
+                    end
+
+                    if i != dim1
+                        edge = (i + column_offset + dim3_offset, i + column_offset + dim3_offset + 1)
+                        push!(fadjlist[i + column_offset + dim3_offset], i + column_offset + dim3_offset + 1)
+                        push!(fadjlist[i + column_offset + dim3_offset + 1], i + column_offset + dim3_offset)
+                        push!(edges, edge)
+                        edge_map[edge] = length(edges)
+                    end
+
+                    if k != dim3
+                        edge = (i + column_offset + dim3_offset, i + column_offset + dim3_offset + dim1 * dim2)
+                        push!(fadjlist[i + column_offset + dim3_offset], i + column_offset + dim3_offset + dim1 * dim2)
+                        push!(fadjlist[i + column_offset + dim3_offset + dim1 * dim2], i + column_offset + dim3_offset)
+                        push!(edges, edge)
+                        edge_map[edge] = length(edges)
+                    end
+                end
+            end
+        end
+    end
+
+    simple_graph = Graphs.SimpleGraph(length(edges), fadjlist)
+    dg.node_data.attributes                 = [weight_name]
+    dg.node_data.attribute_map[weight_name] = 1
+
+    dg.g               = simple_graph
+    dg.nodes           = nodes
+    dg.node_map        = node_map
+    dg.edges           = edges
+    dg.edge_map        = edge_map
+    dg.node_data.data  = node_data
+
+    return dg
+end
+
 
 function filter_nodes(dg::DataGraph, filter_val::Real; attribute::String=g.node_attributes[1])
     node_attributes    = dg.node_data.attributes
@@ -119,7 +194,7 @@ function filter_nodes(dg::DataGraph, filter_val::Real; attribute::String=g.node_
 
     new_dg = DataGraph()
 
-    am = create_adj_mat(dg)
+    am = adjacency_matrix(dg)
 
     bool_vec = node_data[:, node_attribute_map[attribute]] .< filter_val
 
@@ -256,7 +331,7 @@ function run_EC_on_nodes(dg::DataGraph, thresh; attribute::String = dg.node_data
 
     node_attribute_map = dg.node_data.attribute_map
 
-    am = create_adj_mat(dg)
+    am = Graphs.LinAlg.adjacency_matrix(dg.g)
 
     for i in 1:length(nodes)
         if am[i, i] == 1
@@ -270,8 +345,8 @@ function run_EC_on_nodes(dg::DataGraph, thresh; attribute::String = dg.node_data
         bool_vec  = node_data[:, node_attribute_map[attribute]] .< i
         new_am    = am[bool_vec, bool_vec]
         num_nodes = sum(bool_vec)
-        num_edges = sum(new_am)/2
-        ECs[j]    = num_nodes-num_edges
+        num_edges = sum(new_am.nzval) / 2
+        ECs[j]    = num_nodes - num_edges
     end
 
     return ECs
@@ -374,13 +449,12 @@ function aggregate(dg::DataGraph, node_set, new_name)
 
     fadjlist = [Vector{T}() for i in 1:length(new_nodes)]
 
-    node_name_mapping = Dict{T, Any}()
-    new_edges         = Vector{Tuple{T, T}}()
-    new_edge_map      = Dict{Tuple{T, T}, T}()
-    edge_bool_vec     = [false for i in 1:length(edges)]
-    #edge_bool_vec_avg = [false for i in 1:length(edges)]
+    node_name_mapping   = Dict{T, Any}()
+    new_edges           = Vector{Tuple{T, T}}()
+    new_edge_map        = Dict{Tuple{T, T}, T}()
+    edge_bool_vec       = [false for i in 1:length(edges)]
     edge_bool_avg_index = Dict{Tuple{T, T}, Vector{T}}()
-    new_edge_data = fill(NaN, (0, length(edge_attributes)))
+    new_edge_data       = fill(NaN, (0, length(edge_attributes)))
 
     for i in 1:length(nodes)
         node_name_mapping[node_map[nodes[i]]] = nodes[i]
@@ -483,7 +557,6 @@ function aggregate(dg::DataGraph, node_set, new_name)
     new_dg.node_map = new_node_dict
     new_dg.edges    = new_edges
     new_dg.edge_map = new_edge_map
-
 
     return new_dg
 end

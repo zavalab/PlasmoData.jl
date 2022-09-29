@@ -6,11 +6,14 @@ using Plots, Statistics
 # Data for this example comes from Alex Smith's paper on the Euler Characteristic:
 # https://doi.org/10.1016/j.compchemeng.2021.107463
 
+# Load in data; data contains 30 examples with the first 6 being developed brains and the last 24 being underdeveloped
 data = JLD.load("examples/brain.jld")["data"]
 thresh = 0:.0002:.2
 
+# Define array to contain the EC for each data example
 ECs = Array{Any,2}(undef, length(thresh), 30)
 
+# Get the Euler characteristic by building the graph from a symmetric matrix
 for i in 1:30
     mat = abs.(data[i,:,:]) - I
     h = symmetric_matrix_to_graph(mat[:,:])
@@ -21,7 +24,7 @@ for i in 1:30
     println(i)
 end
 
-
+# Get the Euler characteristic by building the graph manually
 for i in 1:30
     dg = DataGraph()
     datai = (abs.(data[i,:,:]) - I)
@@ -41,6 +44,7 @@ end
 adult = mean(ECs[:,1:6], dims=2)
 child = mean(ECs[:,7:30], dims=2)
 
+# Plot the resulting data
 plt = plot(thresh, adult, label="Developed")
 plot!(thresh, child, label="Underdeveloped")
 
@@ -48,9 +52,9 @@ plot!(thresh, child, label="Underdeveloped")
 # Optional plotting
 include("plots.jl")
 
-h = symmetric_matrix_to_graph(data[1,:,:])
-x = DataGraph()
-x.nodes = h.nodes
-plot_graph(x)
-h.node_positions = x.node_positions
-plot_graph(h; color=:gray, linealpha=.2, xdim = 400, ydim = 400, save_fig=true, fig_name="full_plot.png")
+#h = symmetric_matrix_to_graph(data[1,:,:])
+#x = DataGraph()
+#x.nodes = h.nodes
+#plot_graph(x)
+#h.node_positions = x.node_positions
+#plot_graph(h; color=:gray, linealpha=.2, xdim = 400, ydim = 400, save_fig=true, fig_name="full_plot.png")

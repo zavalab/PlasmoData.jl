@@ -326,3 +326,8 @@ function create_adj_mat(dg::DataGraph; sparse::Bool = true)
 
     return mat
 end
+
+function adjacency_matrix(dg::DataGraph)
+    am = Graphs.LinAlg.adjacency_matrix(dg.g)
+    return am
+end
