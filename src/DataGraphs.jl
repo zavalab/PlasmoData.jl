@@ -4,6 +4,7 @@ using Graphs
 using SparseArrays
 using Statistics
 using GeometryBasics
+using LinearAlgebra
 
 export DataGraph, add_node!, add_node_data!, add_edge_data!, adjacency_matrix
 export get_EC, matrix_to_graph, symmetric_matrix_to_graph, mvts_to_graph, tensor_to_graph

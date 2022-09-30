@@ -131,7 +131,30 @@ end
 
 DataGraph() = DataGraph{Int, Float64, Float64, Matrix{Float64}, Matrix{Float64}}()
 
-#TODO: Add constructor for edge list or adjacency matrix
+function DataGraph(adj_mat::AbstractMatrix{T}) where {T <: Real}
+
+    dima, dimb = size(adj_mat)
+    isequal(dima, dimb) || throw(ArgumentError("Adjacency / distance matrices must be square"))
+    LinearAlgebra.issymmetric(adj_mat) || throw(ArgumentError("Adjacency / distance matrices must be symmetric"))
+
+    dg = DataGraph()
+
+    @inbounds for i in findall(LinearAlgebra.triu(adj_mat) .!= 0)
+        Graphs.add_edge!(dg, i[1], i[2])
+    end
+
+    return dg
+end
+
+function DataGraph(edge_list::Vector{T}) where {T <: Tuple{Any, Any}}
+    dg = DataGraph()
+
+    for i in edge_list
+        Graphs.add_edge!(dg, i[1], i[2])
+    end
+
+    return dg
+end
 
 function _get_edge(node1_index, node2_index)
     if node2_index > node1_index
@@ -184,6 +207,7 @@ end
 
 """
     add_edge!(g, node_1, node_2)
+    add_edge!(g, (node1, node2))
 
 Add an edge to the graph, `g`. If the nodes are not defined in the graph, they are added to the graph
 """
@@ -236,6 +260,10 @@ function Graphs.add_edge!(dg::DataGraph, node1::Any, node2::Any)
     end
 end
 
+function Graphs.add_edge!(dg::DataGraph, edge::Tuple{Any, Any})
+    Graphs.add_edge!(dg::DataGraph, edge[1], edge[2])
+end
+
 function add_node_data!(dg::DataGraph, node::Any, node_weight::Number, attribute::String)
     nodes         = dg.nodes
     attributes    = dg.node_data.attributes
@@ -266,7 +294,6 @@ function add_node_data!(dg::DataGraph, node::Any, node_weight::Number, attribute
         return true
     end
 end
-
 
 function add_edge_data!(dg::DataGraph, node1::Any, node2::Any, edge_weight::Real, attribute::String)
     edges         = dg.edges
@@ -306,25 +333,8 @@ function add_edge_data!(dg::DataGraph, node1::Any, node2::Any, edge_weight::Real
     end
 end
 
-function create_adj_mat(dg::DataGraph; sparse::Bool = true)
-    nodes       = dg.nodes
-    edges       = dg.edges
-    node_map    = dg.node_map
-
-    nn = length(nodes)
-
-    if sparse
-        mat = SparseArrays.spzeros(Bool, nn, nn)
-    else
-        mat = zeros(Bool, nn, nn)
-    end
-
-    for i in edges
-       mat[i[1], i[2]] = 1
-       mat[i[2], i[1]] = 1
-    end
-
-    return mat
+function add_edge_data!(dg::DataGraph, edge::Tuple{Any, Any}, edge_weight::Real, attribute::String)
+    add_edge_data!(dg, edge[1], edge[2], edge_weight, attribute)
 end
 
 function adjacency_matrix(dg::DataGraph)

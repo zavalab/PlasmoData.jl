@@ -47,11 +47,10 @@ yhat, decision_values = svmpredict(model, Xtest)
 println("The error rate is $(sum(abs.(yhat .- ytest))/2 / 100)%" )
 
 # Plot the average EC curves for environment 1 and 2
-using Statistics
+using Statistics, Plots
 
 env1_avg = mean(X[:, 1:100], dims = 2)
 env2_avg = mean(X[:, 101:end], dims = 2)
-using Plots
 
 plt_avg = plot(thresh, env1_avg)
 plot!(thresh, env2_avg)

@@ -1,6 +1,6 @@
 using Revise
 using Test
-using DataGraphs
+using DataGraphs, SparseArrays, LinearAlgebra
 
 # Test add_node!
 nodes = [7, "node2", :node3, 17.5]
@@ -70,3 +70,39 @@ add_edge_data!(dg, edges[2][1], edges[2][2], edge_data[2], "weight")
     @test dg.edge_data.data[:, 1] == edge_data
     @test dg.edge_data.attributes == ["weight"]
 end
+
+adj_mat = sparse([1, 1, 2, 3, 3, 4, 2, 3, 5, 4, 5, 5],
+    [2, 3, 5, 4, 5, 5, 1, 1, 2, 3, 3, 4],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+
+dg = DataGraph(adj_mat)
+
+@testset "adjacency matrix constructor" begin
+    @test length(dg.nodes) == 5
+    @test length(dg.edges) == 6
+    @test (1, 2) in dg.edges
+    @test (1, 3) in dg.edges
+    @test (3, 4) in dg.edges
+    @test (2, 5) in dg.edges
+    @test (3, 5) in dg.edges
+    @test (4, 5) in dg.edges
+end
+
+edge_list = [(1, 2), (1, 3), (3, 4), (2, 5), (3, 5), (4, 5)]
+
+dg = DataGraph(edge_list)
+
+@testset "edge_list constructor" begin
+    @test length(dg.nodes) == 5
+    @test length(dg.edges) == 6
+    @test (1, 2) in dg.edges
+    @test (1, 3) in dg.edges
+    @test (3, 4) in dg.edges
+    @test (2, 5) in dg.edges
+    @test (3, 5) in dg.edges
+    @test (4, 5) in dg.edges
+end
+
+# Add constructor tests
+# Add adjacency matrix test
+# Add functionality tests like matrix_to_graph and tensor_to_graph
