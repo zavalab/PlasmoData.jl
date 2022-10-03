@@ -1,11 +1,3 @@
-abstract type AbstractDataGraph{T} <: Graphs.AbstractGraph{T} end
-
-mutable struct NodeData{T, M}
-    attributes::Vector{String}
-    attribute_map::Dict{String, Int}
-    data::M
-end
-
 function NodeData(
     attributes::Vector{String} = Vector{String}(),
     attribute_map::Dict{String, Int} = Dict{String, Int}(),
@@ -16,12 +8,6 @@ function NodeData(
         attribute_map,
         data
     )
-end
-
-mutable struct EdgeData{T, M}
-    attributes::Vector{String}
-    attribute_map::Dict{String, Int}
-    data::M
 end
 
 function EdgeData(
@@ -36,21 +22,7 @@ function EdgeData(
     )
 end
 
-mutable struct DataGraph{T, T1, T2, M1, M2} <: AbstractDataGraph{T}
-    g::Graphs.SimpleGraph{T}
-
-    nodes::Vector{Any}
-    edges::Vector{Tuple{T, T}}
-    node_map::Dict{Any, T}
-    edge_map::Dict{Tuple{T, T}, T}
-
-    node_data::NodeData{T1, M1}
-    edge_data::EdgeData{T2, M2}
-
-    node_positions::Array{Union{GeometryBasics.Point{2,Float64}, Array{Float64, 2}},1}
-end
-
-function Base.eltype(datagraph::DataGraph)
+function Base.eltype(datagraph::D) where {D <: DataGraphUnion}
     return eltype(eltype(datagraph.g.fadjlist))
 end
 
@@ -191,7 +163,7 @@ function add_node!(
             node_data = dg.node_data.data
             row_to_add = fill(NaN, (1, length(attributes)))
             node_data = vcat(node_data, row_to_add)
-            dg.node_data._data = node_data
+            dg.node_data.data = node_data
         end
 
         # Add the new node as a key to the dictionary
@@ -206,10 +178,10 @@ end
 
 
 """
-    add_edge!(g, node_1, node_2)
-    add_edge!(g, (node1, node2))
+    add_edge!(dg, node_1, node_2)
+    add_edge!(dg, (node1, node2))
 
-Add an edge to the graph, `g`. If the nodes are not defined in the graph, they are added to the graph
+Add an edge to the DataGraph, `dg`. If the nodes are not defined in the graph, they are added to the graph
 """
 function Graphs.add_edge!(dg::DataGraph, node1::Any, node2::Any)
     edges      = dg.edges
@@ -295,7 +267,7 @@ function add_node_data!(dg::DataGraph, node::Any, node_weight::Number, attribute
     end
 end
 
-function add_edge_data!(dg::DataGraph, node1::Any, node2::Any, edge_weight::Real, attribute::String)
+function add_edge_data!(dg::DataGraph, node1::Any, node2::Any, edge_weight::T, attribute::String) where {T <: Real}
     edges         = dg.edges
     attributes    = dg.edge_data.attributes
     edge_map      = dg.edge_map
@@ -333,11 +305,11 @@ function add_edge_data!(dg::DataGraph, node1::Any, node2::Any, edge_weight::Real
     end
 end
 
-function add_edge_data!(dg::DataGraph, edge::Tuple{Any, Any}, edge_weight::Real, attribute::String)
+function add_edge_data!(dg::DataGraph, edge::Tuple{Any, Any}, edge_weight::T, attribute::String) where {T <: Real}
     add_edge_data!(dg, edge[1], edge[2], edge_weight, attribute)
 end
 
-function adjacency_matrix(dg::DataGraph)
+function adjacency_matrix(dg::D) where {D <: DataGraphUnion}
     am = Graphs.LinAlg.adjacency_matrix(dg.g)
     return am
 end
