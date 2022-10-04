@@ -44,7 +44,7 @@ model = svmtrain(Xtrain, ytrain, kernel = Kernel.Linear)
 
 yhat, decision_values = svmpredict(model, Xtest)
 
-println("The error rate is $(sum(abs.(yhat .- ytest))/2 / 100)%" )
+println("The error rate is $(sum(abs.(yhat .- ytest))/2)%" )
 
 # Plot the average EC curves for environment 1 and 2
 using Statistics, Plots
@@ -57,13 +57,18 @@ plot!(thresh, env2_avg)
 display(plt_avg)
 
 # Plot the individual EC curves
-plt = plot(thresh, X[:, 1], color=:blue, legend=false, linewidth = .2)
+plt = plot(thresh, X[:, 1], color=:blue, legend=:topright, linewidth = .2, label="Env 1", linealpha=.5)
+plot!(thresh, X[:, 101], color=:red, label="Env 2", linealpha=.5)
 for i in 2:100
-    plot!(thresh, X[:, i], color=:blue, linewidth=.2)
+    plot!(thresh, X[:, i], color=:blue, linewidth=.2, label=:none, linealpha=.5)
 end
-for i in 101:200
-    plot!(thresh, X[:, i], color=:red, linewidth=.2)
+for i in 102:200
+    plot!(thresh, X[:, i], color=:red, linewidth=.2, label=:none, linealpha=.5)
 end
+plot!(thresh, env1_avg, label="Env 1 Average", color=:black)
+plot!(thresh, env2_avg, label="Env 2 Average", color=:darkred)
+xlabel!("Threshold Value")
+ylabel!("Euler Characteristic")
 display(plt)
 
 # Perform PCA and plot the results for environments 1 and 2
@@ -76,6 +81,8 @@ Yte = MultivariateStats.predict(M, Xtest)
 env1 = Yte[:, 1:50]
 env2 = Yte[:, 51:100]
 
-p = scatter(env1[1, :], env1[2,:], marker=:circle, linewidth=0)
-scatter!(env2[1, :], env2[2, :], marker=:circle, linewidth=0)
+p = scatter(env1[1, :], env1[2,:], marker=:circle, legend=:topleft, linewidth=0, label="Env 1")
+scatter!(env2[1, :], env2[2, :], marker=:circle, linewidth=0, label= "Env 2")
 plot!(p)
+xlabel!("Principal Component 1")
+ylabel!("Principal Component 2")

@@ -1,6 +1,7 @@
 using Revise
 using DataGraphs, Graphs
 using Statistics, DelimitedFiles
+using DataGraphPlots
 
 abc = rand(10, 5, 4)
 
@@ -8,9 +9,7 @@ tensor_graph = tensor_to_graph(abc)
 
 tensor_graph.edges
 
-include("plots.jl")
-
-plot_graph(tensor_graph)
+plot_graph(tensor_graph, color=:gray)
 
 xyz = rand(128, 48, 48)
 
@@ -37,4 +36,6 @@ thresh =0:.002:.7
 ECs = run_EC_on_nodes(tensor_graph, thresh)
 @time ECs = run_EC_on_nodes(tensor_graph, thresh)
 
-using Plots; plot(thresh, ECs)
+using Plots; plot(thresh, ECs, legend=false)
+xlabel!("Threshold")
+ylabel!("Euler Characteristic")

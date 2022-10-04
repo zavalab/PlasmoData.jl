@@ -1,8 +1,7 @@
 using Revise
 using Colors, TestImages, Images
 using DataGraphs, Graphs
-
-include("plots.jl")
+using DataGraphPlots
 
 # Load in the image
 img = Images.load("./examples/Bucky_Badger.jpg")

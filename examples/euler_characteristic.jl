@@ -2,6 +2,7 @@ using Revise
 using DataGraphs, Graphs
 using JLD, LinearAlgebra
 using Plots, Statistics
+using DataGraphPlots
 
 # Data for this example comes from Alex Smith's paper on the Euler Characteristic:
 # https://doi.org/10.1016/j.compchemeng.2021.107463
@@ -48,9 +49,6 @@ child = mean(ECs[:,7:30], dims=2)
 plt = plot(thresh, adult, label="Developed")
 plot!(thresh, child, label="Underdeveloped")
 
-
-# Optional plotting
-include("plots.jl")
 
 #h = symmetric_matrix_to_graph(data[1,:,:])
 #x = DataGraph()

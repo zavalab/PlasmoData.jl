@@ -1,6 +1,6 @@
 using Revise
 using DataGraphs, Graphs
-include("plots.jl")
+using DataGraphPlots
 
 mat = rand(10, 10)
 
