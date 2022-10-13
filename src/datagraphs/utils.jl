@@ -173,7 +173,7 @@ function tensor_to_graph(tensor::AbstractArray, weight_name::String="weight")
 end
 
 
-function filter_nodes(dg::DataGraph, filter_val::Real; attribute::String=g.node_attributes[1])
+function filter_nodes(dg::DataGraph, filter_val::Real; attribute::String=dg.node_data.attributes[1])
     node_attributes    = dg.node_data.attributes
     edge_attributes    = dg.edge_data.attributes
     node_attribute_map = dg.node_data.attribute_map
@@ -206,6 +206,8 @@ function filter_nodes(dg::DataGraph, filter_val::Real; attribute::String=g.node_
     if length(node_positions) > 0 && length(node_positions) == length(nodes)
         new_node_pos = node_positions[bool_vec]
         new_dg.node_positions  = new_node_pos
+    else
+        new_node_pos = [[0.0 0.0]]
     end
 
     new_node_map = Dict()
@@ -221,8 +223,8 @@ function filter_nodes(dg::DataGraph, filter_val::Real; attribute::String=g.node_
 
     for j in 1:length(new_nodes)
         for i in (j + 1):length(new_nodes)
-            if new_am[i,j]
-                new_edge = (i, j)
+            if new_am[i,j] == 1
+                new_edge = (j, i)
                 push!(new_edges, new_edge)
                 new_edge_map[new_edge] = length(new_edges)
 
@@ -248,7 +250,7 @@ function filter_nodes(dg::DataGraph, filter_val::Real; attribute::String=g.node_
         new_dg.edge_data.attributes_map = dg.edge_data.attributes_map
     end
 
-    simple_graph = Graphs.SimpleGraph(T(length(edges)), fadjlist)
+    simple_graph = Graphs.SimpleGraph(T(length(new_edges)), fadjlist)
 
     new_dg.g                    = simple_graph
     new_dg.nodes                = new_nodes
@@ -325,7 +327,40 @@ function filter_edges(dg::DataGraph, filter_val::Real; attribute::String = dg.ed
     return new_dg
 end
 
-function run_EC_on_nodes(dg::DataGraph, thresh; attribute::String = dg.node_data.attributes[1])
+function run_EC_on_nodes(dg::DataGraph, thresh; attribute::String = dg.node_data.attributes[1], scale::Bool = false)
+    nodes        = dg.nodes
+    node_data    = dg.node_data.data
+
+    node_attribute_map = dg.node_data.attribute_map
+
+    am = Graphs.LinAlg.adjacency_matrix(dg.g)
+
+    if scale
+        scale_factor = length(dg.nodes) + length(dg.edges)
+    else
+        scale_factor = 1
+    end
+
+    for i in 1:length(nodes)
+        if am[i, i] == 1
+            am[i, i] = 2
+        end
+    end
+
+    ECs = zeros(length(thresh))
+
+    for (j,i) in enumerate(thresh)
+        bool_vec  = node_data[:, node_attribute_map[attribute]] .< i
+        new_am    = am[bool_vec, bool_vec]
+        num_nodes = sum(bool_vec)
+        num_edges = sum(new_am.nzval) / 2
+        ECs[j]    = num_nodes - num_edges
+    end
+
+    return ECs ./ scale_factor
+end
+
+function run_fraction_EC_on_nodes(dg::DataGraph, thresh; attribute::String = dg.node_data.attributes[1])
     nodes        = dg.nodes
     node_data    = dg.node_data.data
 
@@ -346,16 +381,21 @@ function run_EC_on_nodes(dg::DataGraph, thresh; attribute::String = dg.node_data
         new_am    = am[bool_vec, bool_vec]
         num_nodes = sum(bool_vec)
         num_edges = sum(new_am.nzval) / 2
-        ECs[j]    = num_nodes - num_edges
+        ECs[j]    = num_nodes / length(dg.nodes) - num_edges / length(dg.edges)
     end
 
     return ECs
 end
-
-function run_EC_on_edges(dg::DataGraph, thresh; attribute::String = dg.edge_data.attributes[1])
+function run_EC_on_edges(dg::DataGraph, thresh; attribute::String = dg.edge_data.attributes[1], scale::Bool = false)
     edge_data = dg.edge_data.data
     nodes     = dg.nodes
     edge_attribute_map = dg.edge_data.attribute_map
+
+    if scale
+        scale_factor = length(dg.nodes) + length(dg.edges)
+    else
+        scale_factor = 1
+    end
 
     ECs = zeros(length(thresh))
 
@@ -367,7 +407,7 @@ function run_EC_on_edges(dg::DataGraph, thresh; attribute::String = dg.edge_data
         ECs[j]    = num_nodes - num_edges
     end
 
-    return ECs
+    return ECs ./ scale_factor
 end
 
 function aggregate(dg::DataGraph, node_set, new_name)

@@ -8,7 +8,7 @@ using DataGraphPlots
 # https://doi.org/10.1016/j.compchemeng.2021.107463
 
 # Load in data; data contains 30 examples with the first 6 being developed brains and the last 24 being underdeveloped
-data = JLD.load("examples/brain.jld")["data"]
+data = JLD.load((@__DIR__)*"/brain.jld")["data"]
 thresh = 0:.0002:.2
 
 # Define array to contain the EC for each data example
@@ -48,7 +48,6 @@ child = mean(ECs[:,7:30], dims=2)
 # Plot the resulting data
 plt = plot(thresh, adult, label="Developed")
 plot!(thresh, child, label="Underdeveloped")
-
 
 #h = symmetric_matrix_to_graph(data[1,:,:])
 #x = DataGraph()

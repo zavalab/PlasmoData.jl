@@ -28,10 +28,31 @@ function get_edge_data(dg::DataGraph, edge_tuple::Tuple{Any, Any}, attribute::St
     return edge_data.data[edge_map[edge], attribute_map[attribute]]
 end
 
-function get_node_data(dg::DataGraph)
+function get_node_data(dg::DataGraphUnion)
     return dg.node_data
 end
 
-function get_edge_data(dg::DataGraph)
+function get_edge_data(dg::DataGraphUnion)
     return dg.edge_data
 end
+
+function ne(dg::DataGraphUnion)
+    length(dg.edges)
+end
+
+function nn(dg::DataGraphUnion)
+    length(dg.nodes)
+end
+
+function nv(dg::DataGraphUnion)
+    nn(dg)
+end
+
+
+# Add set node_data
+# Add set edge_data
+# Add get_node positions
+# Add get_edge positions
+# Add number nodes
+# Add number edges
+# Consider changing interface functions; some functions apply to DataGraphUnions, and I should consider where to put these

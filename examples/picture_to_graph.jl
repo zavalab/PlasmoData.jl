@@ -4,7 +4,7 @@ using DataGraphs, Graphs
 using DataGraphPlots
 
 # Load in the image
-img = Images.load("./examples/Bucky_Badger.jpg")
+img = Images.load((@__DIR__)*"/Bucky_Badger.jpg")
 #picture from https://www.wikiwand.com/en/Bucky_Badger
 
 # Convert the image to grayscale
@@ -17,7 +17,7 @@ mat = convert(Array{Float64}, imgg)
 mat_graph = matrix_to_graph(mat)
 mat_graph.node_positions = set_matrix_node_positions!(mat_graph, mat)
 
-plot_graph(mat_graph; plot_edges=false, nodesize = .5)
+plot_graph(mat_graph; plot_edges=false, nodesize = .5, nodestrokewidth=.001, node_z = mat_graph.node_data.data, nodecolor = :thermal)
 
 # Filter the graph
 for i in 1:3
