@@ -81,8 +81,8 @@ Yte = MultivariateStats.predict(M, Xtest)
 env1 = Yte[:, 1:50]
 env2 = Yte[:, 51:100]
 
-p = scatter(env1[1, :], env1[2,:], marker=:circle, legend=:topleft, linewidth=0, label="Env 1")
-scatter!(env2[1, :], env2[2, :], marker=:circle, linewidth=0, label= "Env 2")
+p = scatter(env1[1, :], env1[2,:], marker=:circle, markersize = 5, legend=#=:topleft=#:none, linewidth=0, label="Env 1", xaxis = nothing, yaxis = nothing)
+scatter!(env2[1, :], env2[2, :], marker=:circle, linewidth=0, label= "Env 2", markersize = 5)
 plot!(p)
 xlabel!("Principal Component 1")
 ylabel!("Principal Component 2")

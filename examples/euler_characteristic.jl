@@ -19,7 +19,7 @@ for i in 1:30
     mat = abs.(data[i,:,:]) - I
     h = symmetric_matrix_to_graph(mat[:,:])
     println("built graph")
-    EC_vals = run_EC_on_edges(h, thresh)
+    EC_vals = run_EC_on_edges(h, thresh, scale = true)
     println("Running EC")
     ECs[:,i] .= EC_vals
     println(i)
@@ -48,6 +48,19 @@ child = mean(ECs[:,7:30], dims=2)
 # Plot the resulting data
 plt = plot(thresh, adult, label="Developed")
 plot!(thresh, child, label="Underdeveloped")
+
+plt = plot(thresh, ECs[:, 1], label = "Class 1", color = :blue, linewidth = 1, linestyle = :dash)
+plot!(thresh, ECs[:, 7], label = "Class 2", color =:red, linewidth = 1)
+for i in 2:6
+    plot!(thresh, ECs[:, i], label = :none, color = :blue, linewidth = 1, linestyle = :dash)
+end
+for i in 8:30
+    plot!(thresh, ECs[:, i], label = :none, color = :red, linewidth = 1)
+end
+xlabel!("Filtration Threshold")
+ylabel!("Scaled Euler Characteristic")
+display(plt)
+
 
 #h = symmetric_matrix_to_graph(data[1,:,:])
 #x = DataGraph()

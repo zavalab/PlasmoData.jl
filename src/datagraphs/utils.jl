@@ -7,7 +7,7 @@ function get_EC(dg::DataGraph)
     return EC
 end
 
-function matrix_to_graph(matrix::AbstractMatrix, weight_name::String="weight")
+function matrix_to_graph(matrix::AbstractMatrix, attribute::String="weight")
 
     dim1, dim2 = size(matrix)
     dg = DataGraph()
@@ -51,8 +51,8 @@ function matrix_to_graph(matrix::AbstractMatrix, weight_name::String="weight")
     end
 
     simple_graph = Graphs.SimpleGraph(length(edges), fadjlist)
-    dg.node_data.attributes                 = [weight_name]
-    dg.node_data.attribute_map[weight_name] = 1
+    dg.node_data.attributes                 = [attribute]
+    dg.node_data.attribute_map[attribute] = 1
 
     dg.g               = simple_graph
     dg.nodes           = nodes
@@ -64,7 +64,7 @@ function matrix_to_graph(matrix::AbstractMatrix, weight_name::String="weight")
     return dg
 end
 
-function symmetric_matrix_to_graph(matrix, weight_name::String="weight", tol = 1e-9)
+function symmetric_matrix_to_graph(matrix; attribute::String="weight", tol = 1e-9)
 
     dim1, dim2 = size(matrix)
 
@@ -72,16 +72,16 @@ function symmetric_matrix_to_graph(matrix, weight_name::String="weight", tol = 1
         error("Matrix is not square")
     end
 
-    if all(isapprox.(matrix - matrix', 0; rtol = tol))
+    if !all(abs.(matrix - matrix') .<= tol)
         error("Matrix is not symmetric")
     end
 
     dg = DataGraph()
 
     for j in 1:dim2
-        for i in j:dim1
+        for i in (j + 1):dim1
             Graphs.add_edge!(dg, i, j)
-            add_edge_data!(dg, i, j, matrix[i,j], weight_name)
+            add_edge_data!(dg, i, j, matrix[i,j], attribute)
         end
     end
 
@@ -173,7 +173,7 @@ function tensor_to_graph(tensor::AbstractArray, weight_name::String="weight")
 end
 
 
-function filter_nodes(dg::DataGraph, filter_val::Real; attribute::String=dg.node_data.attributes[1])
+function filter_nodes(dg::DataGraph, filter_val::R; attribute::String=dg.node_data.attributes[1]) where {R <: Real}
     node_attributes    = dg.node_data.attributes
     edge_attributes    = dg.edge_data.attributes
     node_attribute_map = dg.node_data.attribute_map
@@ -266,7 +266,7 @@ function filter_nodes(dg::DataGraph, filter_val::Real; attribute::String=dg.node
     return new_dg
 end
 
-function filter_edges(dg::DataGraph, filter_val::Real; attribute::String = dg.edge_data.attributes[1])
+function filter_edges(dg::DataGraph, filter_val::R; attribute::String = dg.edge_data.attributes[1]) where {R <: Real}
     nodes           = dg.nodes
     edges           = dg.edges
     node_attributes = dg.node_data.attributes
@@ -308,7 +308,7 @@ function filter_edges(dg::DataGraph, filter_val::Real; attribute::String = dg.ed
 
     new_dg = DataGraph()
 
-    simple_graph = Graphs.SimpleGraph(T(length(edges)), fadjlist)
+    simple_graph = Graphs.SimpleGraph(T(length(new_edges)), fadjlist)
 
     new_dg.g                    = simple_graph
     new_dg.nodes                = nodes
@@ -509,7 +509,7 @@ function aggregate(dg::DataGraph, node_set, new_name)
             new_node2 = new_node_dict[node_name_mapping[edge[2]]]
 
             push!(new_edges, (new_node1, new_node2))
-            new_edge_map[(new_node1, new_node2)] = length(edges)
+            new_edge_map[(new_node1, new_node2)] = length(new_edges)
 
             @inbounds node_neighbors = fadjlist[new_node1]
             index = searchsortedfirst(node_neighbors, new_node2)
@@ -528,9 +528,9 @@ function aggregate(dg::DataGraph, node_set, new_name)
             new_node1 = new_node_dict[node_name_mapping[edge[1]]]
             new_node2 = length(new_nodes)
 
-            if !((new_node1, new_node2) in edges)
+            if !((new_node1, new_node2) in new_edges)
                 push!(new_edges, (new_node1, new_node2))
-                new_edge_map[(new_node1, new_node2)] = length(edges)
+                new_edge_map[(new_node1, new_node2)] = length(new_edges)
 
                 @inbounds node_neighbors = fadjlist[new_node1]
                 index = searchsortedfirst(node_neighbors, new_node2)
@@ -545,15 +545,21 @@ function aggregate(dg::DataGraph, node_set, new_name)
                     edge_bool_avg_index[(new_node1, new_node2)] = Vector{T}([edge_map[edge]])
                 end
             else
-                push!(edge_bool_avg_index[(new_node1, new_node2)], edge_map[edge])
+                if length(edge_attributes) > 0
+                    if (new_node1, new_node2) in keys(edge_bool_avg_index)
+                        push!(edge_bool_avg_index[(new_node1, new_node2)], edge_map[edge])
+                    else
+                        edge_bool_avg_index[(new_node1, new_node2)] = Vector{T}([edge_map[edge]])
+                    end
+                end
             end
         elseif node1_bool && !node2_bool
             new_node1 = new_node_dict[node_name_mapping[edge[2]]]
             new_node2 = length(new_nodes)
 
-            if !((new_node1, new_node2) in edges)
+            if !((new_node1, new_node2) in new_edges)
                 push!(new_edges, (new_node1, new_node2))
-                new_edge_map[(new_node1, new_node2)] = length(edges)
+                new_edge_map[(new_node1, new_node2)] = length(new_edges)
 
                 @inbounds node_neighbors = fadjlist[new_node1]
                 index = searchsortedfirst(node_neighbors, new_node2)
@@ -569,7 +575,11 @@ function aggregate(dg::DataGraph, node_set, new_name)
                 end
             else
                 if length(edge_attributes) > 0
-                    push!(edge_bool_avg_index[(new_node1, new_node2)], edge_map[edge])
+                    if (new_node1, new_node2) in keys(edge_bool_avg_index)
+                        push!(edge_bool_avg_index[(new_node1, new_node2)], edge_map[edge])
+                    else
+                        edge_bool_avg_index[(new_node1, new_node2)] = Vector{T}([edge_map[edge]])
+                    end
                 end
             end
         end
@@ -590,7 +600,7 @@ function aggregate(dg::DataGraph, node_set, new_name)
         new_g.edge_data.data           = new_edge_data
     end
 
-    simple_graph = Graphs.SimpleGraph(T(length(edges)), fadjlist)
+    simple_graph = Graphs.SimpleGraph(T(length(new_edges)), fadjlist)
 
     new_dg.g        = simple_graph
     new_dg.nodes    = new_nodes
