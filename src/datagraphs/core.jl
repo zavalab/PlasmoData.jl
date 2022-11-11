@@ -1,7 +1,15 @@
+"""
+    NodeData(attributes = Vector{String}(),
+        attribute_map = Dict{String, Int}(),
+        data = Array{Float64}(undef, (0, 0))
+    )
+
+Constructor for building NodeData{T, M}
+"""
 function NodeData(
     attributes::Vector{String} = Vector{String}(),
     attribute_map::Dict{String, Int} = Dict{String, Int}(),
-    data::M = Array{Float64}(undef, 0, 0)
+    data::M = Array{Float64}(undef, (0, 0))
 ) where {T, M <: Matrix{T}}
     NodeData{T, M}(
         attributes,
@@ -10,10 +18,18 @@ function NodeData(
     )
 end
 
+"""
+    EdgeData(attributes = Vector{String}(),
+        attribute_map = Dict{String, Int}(),
+        data = Array{Float64}(undef, (0, 0))
+    )
+
+Constructor for building EdgeData{T, M}
+"""
 function EdgeData(
     attributes::Vector{String} = Vector{String}(),
     attribute_map::Dict{String, Int} = Dict{String, Int}(),
-    data::M = NamedArray{Float64}(undef, 0, 0)
+    data::M = NamedArray{Float64}(undef, (0, 0))
 ) where {T, M <: Matrix{T}}
     EdgeData{T, M}(
         attributes,
@@ -26,6 +42,13 @@ function Base.eltype(datagraph::D) where {D <: DataGraphUnion}
     return eltype(eltype(datagraph.g.fadjlist))
 end
 
+"""
+    DataGraph(nodes, edges; kwargs)
+
+Constructor for building a DataGraph object from a list of nodes and edges. Key word arguments
+include `ne`, `fadjlist`, `node_attributes`, `edge_attributes`, `node_map`, `edge_map`,
+`node_data`, `edge_data`, and `node_positions`.
+"""
 function DataGraph(
     nodes::Vector{Any},
     edges::Vector{Tuple{T, T}};
@@ -72,7 +95,19 @@ function DataGraph(
     )
 end
 
-function DataGraph{T, T1, T2, M1, M2}() where {T <: Integer, T1, T2,  M1 <: Matrix{T1}, M2 <: Matrix{T2}}
+"""
+    DataGraph{T, T1, T2, M1, M2}()
+    DataGraph()
+
+Constructor for initializing and empty DataGraph object. Datatypes are as follows: T is the
+integer type for indexing, T1 and T2 are the data type in the node and edge data respectively,
+and M1 <: AbstractMatrix{T1} corresponds to the node data and M2 <: AbstractMatrix{T2} corresponds
+to the edge data.
+
+When T, T1, T2, M1, and M2 are not defined, the defaults are `Int`, `Float64`, `Float64`,
+`Matrix{Float64}`, and `Matrix{Float64}` respectively.
+"""
+function DataGraph{T, T1, T2, M1, M2}() where {T <: Integer, T1, T2,  M1 <: AbstractMatrix{T1}, M2 <: AbstractMatrix{T2}}
     nodes = Vector{Any}()
     edges = Vector{Tuple{Int, Int}}()
 
@@ -103,6 +138,11 @@ end
 
 DataGraph() = DataGraph{Int, Float64, Float64, Matrix{Float64}, Matrix{Float64}}()
 
+"""
+    DataGraph(adjacency_matrix::AbstractMatrix)
+
+Constructor for building a DataGraph object from an adjacency matrix.
+"""
 function DataGraph(adj_mat::AbstractMatrix{T}) where {T <: Real}
 
     dima, dimb = size(adj_mat)
@@ -112,17 +152,23 @@ function DataGraph(adj_mat::AbstractMatrix{T}) where {T <: Real}
     dg = DataGraph()
 
     @inbounds for i in findall(LinearAlgebra.triu(adj_mat) .!= 0)
-        Graphs.add_edge!(dg, i[1], i[2])
+        DataGraphs.add_edge!(dg, i[1], i[2])
     end
 
     return dg
 end
 
+"""
+    DataGraph(edge_list)
+
+Constructor for building a DataGraph object from a list of edges, where the edge list is a
+vector of Tuple{Any, Any}.
+"""
 function DataGraph(edge_list::Vector{T}) where {T <: Tuple{Any, Any}}
     dg = DataGraph()
 
     for i in edge_list
-        Graphs.add_edge!(dg, i[1], i[2])
+        DataGraphs.add_edge!(dg, i[1], i[2])
     end
 
     return dg
@@ -143,8 +189,8 @@ end
 Add the node `node_name` to the DataGraph `dg`
 """
 function add_node!(
-    dg::DataGraph, node_name::Any
-)
+    dg::DataGraph, node_name::N
+) where {N <: Any}
     nodes      = dg.nodes
     attributes = dg.node_data.attributes
     node_map   = dg.node_map
@@ -183,7 +229,7 @@ end
 
 Add an edge to the DataGraph, `dg`. If the nodes are not defined in the graph, they are added to the graph
 """
-function Graphs.add_edge!(dg::DataGraph, node1::Any, node2::Any)
+function add_edge!(dg::DataGraph, node1::N1, node2::N2) where {N1 <: Any, N2 <: Any}
     edges      = dg.edges
     nodes      = dg.nodes
     attributes = dg.edge_data.attributes
@@ -232,11 +278,18 @@ function Graphs.add_edge!(dg::DataGraph, node1::Any, node2::Any)
     end
 end
 
-function Graphs.add_edge!(dg::DataGraph, edge::Tuple{Any, Any})
-    Graphs.add_edge!(dg::DataGraph, edge[1], edge[2])
+function add_edge!(dg::DataGraph, edge::Tuple{Any, Any})
+    DataGraphs.add_edge!(dg::DataGraph, edge[1], edge[2])
 end
 
-function add_node_data!(dg::DataGraph, node::Any, node_weight::Number, attribute::String)
+"""
+    add_node_data!(datagraph, node_name, node_weight, attribute_name)
+
+Add a weight value for the given node name in the DataGraph object. User must pass an "attribute
+name" for the given weight. All other nodes that do not have a node_weight value defined for
+that attribute name default to a value of zero.
+"""
+function add_node_data!(dg::DataGraph, node::Any, node_weight::T, attribute::String) where {T <: Real}
     nodes         = dg.nodes
     attributes    = dg.node_data.attributes
     node_map      = dg.node_map
@@ -267,6 +320,15 @@ function add_node_data!(dg::DataGraph, node::Any, node_weight::Number, attribute
     end
 end
 
+"""
+    add_edge_data!(datagraph, node_name1, node_name2, edge_weight, attribute_name)
+    add_edge_data!(datagraph, edge, edge_weight, attribute_name)
+
+Add a weight value for the edge between node_name1 and node_name2 in the DataGraph object.
+When using the second function, `edge` must be a tuple with two node names. User must pass
+an "attribute name" for the given weight. All other edges that do not have an edge_weight
+value defined for that attribute name default to a value of zero.
+"""
 function add_edge_data!(dg::DataGraph, node1::Any, node2::Any, edge_weight::T, attribute::String) where {T <: Real}
     edges         = dg.edges
     attributes    = dg.edge_data.attributes
@@ -309,6 +371,11 @@ function add_edge_data!(dg::DataGraph, edge::Tuple{Any, Any}, edge_weight::T, at
     add_edge_data!(dg, edge[1], edge[2], edge_weight, attribute)
 end
 
+"""
+    adjacency_matrix(datagraph)
+
+Return the adjacency matrix of a DataGraph object
+"""
 function adjacency_matrix(dg::D) where {D <: DataGraphUnion}
     am = Graphs.LinAlg.adjacency_matrix(dg.g)
     return am

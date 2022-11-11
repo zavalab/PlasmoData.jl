@@ -21,7 +21,7 @@ end
 edges = [(17.5, 7), (:node3, "node2"), (7, :node3)]
 
 for (i, j) in edges
-    add_edge!(dg, i, j)
+    DataGraphs.add_edge!(dg, i, j)
 end
 
 @testset "add_edge! test" begin

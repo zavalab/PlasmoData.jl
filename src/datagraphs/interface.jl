@@ -1,3 +1,8 @@
+"""
+    get_node_data(datagraph, node_name, attribute_name)
+
+Returns the value of attribute name on the given node
+"""
 function get_node_data(dg::DataGraph, node::Any, attribute::String=dg.node_data.attributes[1])
     node_map  = dg.node_map
     node_data = dg.node_data
@@ -6,6 +11,13 @@ function get_node_data(dg::DataGraph, node::Any, attribute::String=dg.node_data.
     return node_data.data[node_map[node], attribute_map[attribute]]
 end
 
+"""
+    get_edge_data(datagraph, node_name1, node_name2, attribute_name)
+    get_edge_data(datagraph, edge, attribute_name)
+
+Returns the value of attribute name on the edge between `node_name1` and `node_name2`. `edge` is
+a tuple containing `node_name1` and `node_name2`.
+"""
 function get_edge_data(dg::DataGraph, node1, node2, attribute::String=dg.edge_data.attributes[1])
     edge_map  = dg.edge_map
     edge_data = dg.edge_data
@@ -28,23 +40,44 @@ function get_edge_data(dg::DataGraph, edge_tuple::Tuple{Any, Any}, attribute::St
     return edge_data.data[edge_map[edge], attribute_map[attribute]]
 end
 
-function get_node_data(dg::DataGraphUnion)
+"""
+    get_node_data(dg::D) where {D <: DataGraphUnion}
+
+Returns the `NodeData` object from a DataGraph or DataDiGraph
+"""
+function get_node_data(dg::D) where {D <: DataGraphUnion}
     return dg.node_data
 end
 
-function get_edge_data(dg::DataGraphUnion)
+"""
+    get_edge_data(dg::D) where {D <: DataGraphUnion}
+
+Returns the `EdgeData` object from a DataGraph or DataDiGraph
+"""
+function get_edge_data(dg::D) where {D <: DataGraphUnion}
     return dg.edge_data
 end
 
-function ne(dg::DataGraphUnion)
+"""
+    ne(dg::D) where {D <: DataGraphUnion}
+
+Returns the number of edges in a DataGraph or DataDiGraph
+"""
+function ne(dg::D) where {D <: DataGraphUnion}
     length(dg.edges)
 end
 
-function nn(dg::DataGraphUnion)
+"""
+    nn(dg::D) where {D <: DataGraphUnion}
+    nv(dg::D) where {D <: DataGraphUnion}
+
+Returns the number of nodes (vertices) in a DataGraph or DataDiGraph
+"""
+function nn(dg::D) where {D <: DataGraphUnion}
     length(dg.nodes)
 end
 
-function nv(dg::DataGraphUnion)
+function nv(dg::D) where {D <: DataGraphUnion}
     nn(dg)
 end
 

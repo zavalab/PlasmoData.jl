@@ -1,3 +1,10 @@
+"""
+    get_EC(datagraph)
+
+Returns the Euler Characteristic for a DataGraph. The Euler Characteristic is equal to the
+number of nodes minus the number of edges or the number of connected components minus the
+number of cycles
+"""
 function get_EC(dg::DataGraph)
     nodes = dg.nodes
     edges = dg.edges
@@ -7,6 +14,13 @@ function get_EC(dg::DataGraph)
     return EC
 end
 
+"""
+    matrix_to_graph(matrix, attribute="weight")
+
+Constructs a `DataGraph` object from a matrix and saves the matrix data as node attributes under
+the name `attribute`. The graph has a mesh structure, where each matrix entry is represented by
+a node, and each node is connected to the adjacent matrix entries/nodes.
+"""
 function matrix_to_graph(matrix::AbstractMatrix, attribute::String="weight")
 
     dim1, dim2 = size(matrix)
@@ -63,8 +77,15 @@ function matrix_to_graph(matrix::AbstractMatrix, attribute::String="weight")
 
     return dg
 end
+"""
+    symmetric_matrix_to_graph(matrix; attribute="weight", tol = 1e-9)
 
-function symmetric_matrix_to_graph(matrix; attribute::String="weight", tol = 1e-9)
+Constructs a `DataGraph` object from a symmetric matrix and saves the values of the matrix to
+their corresponding edges. The resulting graph is fully connected (every node is connected to every node)
+and the number of nodes is equal to the dimension of the matrix. Matrix values are saved as edge
+weights under the name `attribute`. `tol` is the tolerance used when testing that the matrix is symmetric.
+"""
+function symmetric_matrix_to_graph(matrix::M; attribute::String="weight", tol::R = 1e-9) where {M <: AbstractMatrix, R <: Real}
 
     dim1, dim2 = size(matrix)
 
@@ -80,7 +101,7 @@ function symmetric_matrix_to_graph(matrix; attribute::String="weight", tol = 1e-
 
     for j in 1:dim2
         for i in (j + 1):dim1
-            Graphs.add_edge!(dg, i, j)
+            DataGraphs.add_edge!(dg, i, j)
             add_edge_data!(dg, i, j, matrix[i,j], attribute)
         end
     end
@@ -88,17 +109,33 @@ function symmetric_matrix_to_graph(matrix; attribute::String="weight", tol = 1e-
     return dg
 end
 
-function mvts_to_graph(mvts, weight_name::String="weight", tol=1e-9)
+"""
+    mvts_to_graph(mvts, attribute)
+
+Converts a multivariate time series to a graph based on the covariance matrix. This first
+calculates the covariance of the multivariate time series (`mvts`) and then computes the
+covariance. It then forms the precision matrix by taking the inverse of the covariance and
+uses the function `symmetric_matrix_to_graph` to form the edge-weighted graph.
+"""
+function mvts_to_graph(mvts, attribute::String="weight", tol::R=1e-9) where {R <: Real}
 
     mvts_cov  = cov(mvts)
     mvts_prec = inv(mvts_cov)
 
-    dg = symmetric_matrix_to_graph(mvts_prec, weight_name, tol)
+    dg = symmetric_matrix_to_graph(mvts_prec, attribute, tol)
 
     return dg
 end
 
-function tensor_to_graph(tensor::AbstractArray, weight_name::String="weight")
+"""
+    tensor_to_graph(tensor, attribute)
+
+Constructs a graph from a 3-D array (a tensor). Each entry of the tensor is represented by
+a node, and each node is connected to the adjacent nodes in each dimension. This function
+creates the graph structure and saves the values of the tensor to their corresponding nodes
+as weight values under the name `attribute`.
+"""
+function tensor_to_graph(tensor::A, attribute::String="weight") where {A <: AbstractArray}
 
     if length(size(tensor)) != 3
         error("Tensor must have 3 dimensions; given tensor has $(length(size(tensor))) dimensions")
@@ -159,8 +196,8 @@ function tensor_to_graph(tensor::AbstractArray, weight_name::String="weight")
     end
 
     simple_graph = Graphs.SimpleGraph(length(edges), fadjlist)
-    dg.node_data.attributes                 = [weight_name]
-    dg.node_data.attribute_map[weight_name] = 1
+    dg.node_data.attributes                 = [attribute]
+    dg.node_data.attribute_map[attribute] = 1
 
     dg.g               = simple_graph
     dg.nodes           = nodes
@@ -172,7 +209,13 @@ function tensor_to_graph(tensor::AbstractArray, weight_name::String="weight")
     return dg
 end
 
+"""
+    filter_nodes(datagraph, filter_value; attribute_name)
 
+Removes the nodes of the graph whose weight value of `attribute_name` is greater than the given
+`filter_value`. If `attribute_name` is not specified, this defaults to the first attribute within
+the DataGraph's `NodeData`.
+"""
 function filter_nodes(dg::DataGraph, filter_val::R; attribute::String=dg.node_data.attributes[1]) where {R <: Real}
     node_attributes    = dg.node_data.attributes
     edge_attributes    = dg.edge_data.attributes
@@ -215,7 +258,7 @@ function filter_nodes(dg::DataGraph, filter_val::R; attribute::String=dg.node_da
     new_edges      = Vector{Tuple{T, T}}()
     new_edge_map   = Dict{Tuple{T, T}, T}()
     old_edge_index = Vector{Int}()
-    fadjlist       = [Vector{T}() for i in 1:length(new_nodes)]
+    fadjlist       = [Vector{T}() for i in 1:length(new_nodes)]  ### TODO: if new_nodes is length 0, this is a vector of type any
 
     for i in 1:length(new_nodes)
         new_node_map[new_nodes[i]] = i
@@ -266,6 +309,13 @@ function filter_nodes(dg::DataGraph, filter_val::R; attribute::String=dg.node_da
     return new_dg
 end
 
+"""
+    filter_edges(datagraph, filter_value; attribute_name)
+
+Removes the edges of the graph whose weight value of `attribute_name` is greater than the given
+`filter_value`. If `attribute_name` is not specified, this defaults to the first attribute within
+the DataGraph's `EdgeData`.
+"""
 function filter_edges(dg::DataGraph, filter_val::R; attribute::String = dg.edge_data.attributes[1]) where {R <: Real}
     nodes           = dg.nodes
     edges           = dg.edges
@@ -327,6 +377,14 @@ function filter_edges(dg::DataGraph, filter_val::R; attribute::String = dg.edge_
     return new_dg
 end
 
+"""
+    run_EC_on_nodes(datagraph, threshold_range; attribute_name, scale = false)
+
+Returns the Euler Characteristic Curve by filtering the nodes of the graph at each value in `threshold_range`
+and computing the Euler Characteristic after each filtration. If `attribute_name` is not defined, it defaults
+to the first attribute in the DataGraph's `NodeData`. `scale` is a Boolean that indicates whether to scale
+the Euler Characteristic by the total number of objects (nodes + edges) in the original graph
+"""
 function run_EC_on_nodes(dg::DataGraph, thresh; attribute::String = dg.node_data.attributes[1], scale::Bool = false)
     nodes        = dg.nodes
     node_data    = dg.node_data.data
@@ -360,32 +418,14 @@ function run_EC_on_nodes(dg::DataGraph, thresh; attribute::String = dg.node_data
     return ECs ./ scale_factor
 end
 
-function run_fraction_EC_on_nodes(dg::DataGraph, thresh; attribute::String = dg.node_data.attributes[1])
-    nodes        = dg.nodes
-    node_data    = dg.node_data.data
+"""
+    run_EC_on_edges(datagraph, threshold_range; attribute_name, scale = false)
 
-    node_attribute_map = dg.node_data.attribute_map
-
-    am = Graphs.LinAlg.adjacency_matrix(dg.g)
-
-    for i in 1:length(nodes)
-        if am[i, i] == 1
-            am[i, i] = 2
-        end
-    end
-
-    ECs = zeros(length(thresh))
-
-    for (j,i) in enumerate(thresh)
-        bool_vec  = node_data[:, node_attribute_map[attribute]] .< i
-        new_am    = am[bool_vec, bool_vec]
-        num_nodes = sum(bool_vec)
-        num_edges = sum(new_am.nzval) / 2
-        ECs[j]    = num_nodes / length(dg.nodes) - num_edges / length(dg.edges)
-    end
-
-    return ECs
-end
+Returns the Euler Characteristic Curve by filtering the edges of the graph at each value in `threshold_range`
+and computing the Euler Characteristic after each filtration. If `attribute_name` is not defined, it defaults
+to the first attribute in the DataGraph's `EdgeData`. `scale` is a Boolean that indicates whether to scale
+the Euler Characteristic by the total number of objects (nodes + edges) in the original graph
+"""
 function run_EC_on_edges(dg::DataGraph, thresh; attribute::String = dg.edge_data.attributes[1], scale::Bool = false)
     edge_data = dg.edge_data.data
     nodes     = dg.nodes
@@ -410,6 +450,14 @@ function run_EC_on_edges(dg::DataGraph, thresh; attribute::String = dg.edge_data
     return ECs ./ scale_factor
 end
 
+"""
+    aggregate(datagraph, node_list, aggregated_node_name)
+
+Aggregates all the nodes in `node_list` into a single node which is called `aggregated_node_name`.
+If nodes have any weight/attribute values defined, These are averaged across all values in the
+`node_list`. Edge weights are also averaged when two or more nodes in the `node_list` are connected
+to the same node and these edges have weights defined on them.
+"""
 function aggregate(dg::DataGraph, node_set, new_name)
     nodes              = dg.nodes
     node_map           = dg.node_map

@@ -9,16 +9,44 @@ using LinearAlgebra
 export DataGraph, DataDiGraph, add_node!, add_node_data!, add_edge_data!, adjacency_matrix
 export get_EC, matrix_to_graph, symmetric_matrix_to_graph, mvts_to_graph, tensor_to_graph
 export filter_nodes, filter_edges, run_EC_on_nodes, run_EC_on_edges, aggregate, average_degree
-export get_node_data, get_edge_data, run_fraction_EC_on_nodes, ne, nn, nv
+export get_node_data, get_edge_data, ne, nn, nv
 
 abstract type AbstractDataGraph{T} <: Graphs.AbstractGraph{T} end
 
+"""
+    NodeData{T, M}
+
+Object for building and storing data corresponding to the nodes of a graph. Data is stored
+in a matrix, but columns of the matrix have attribute names stored in this struct
+
+NodeData have the following attributes:
+ `attributes`: vector of strings with length equal to the number of columns of `data`. Each
+ entry is the name of the attribute of that column of data
+ `attribute_map`: dictionary with keys matching the entries of `attributes`. Maps the key
+ to the corresponding column index
+ `data`: Matrix with the number of rows corresponding to the number of nodes in the graph
+ and with a column for each attribute in `attributes`
+"""
 mutable struct NodeData{T, M}
     attributes::Vector{String}
     attribute_map::Dict{String, Int}
     data::M
 end
 
+"""
+    EdgeData{T, M}
+
+Object for building and storing data corresponding to the edges of a graph. Data is stored
+in a matrix, but columns of the matrix have attribute names stored in this struct
+
+EdgeData have the following attributes:
+ `attributes`: vector of strings with length equal to the number of columns of `data`. Each
+ entry is the name of the attribute of that column of data
+ `attribute_map`: dictionary with keys matching the entries of `attributes`. Maps the key
+ to the corresponding column index
+ `data`: Matrix with the number of rows corresponding to the number of edgess in the graph
+ and with a column for each attribute in `attributes`
+"""
 mutable struct EdgeData{T, M}
     attributes::Vector{String}
     attribute_map::Dict{String, Int}
