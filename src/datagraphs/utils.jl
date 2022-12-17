@@ -15,13 +15,14 @@ function get_EC(dg::DataGraph)
 end
 
 """
-    matrix_to_graph(matrix, attribute="weight")
+    matrix_to_graph(matrix, diagonal = false, attribute="weight")
 
 Constructs a `DataGraph` object from a matrix and saves the matrix data as node attributes under
-the name `attribute`. The graph has a mesh structure, where each matrix entry is represented by
-a node, and each node is connected to the adjacent matrix entries/nodes.
+the name `attribute`. If `diagonal = false`, the graph has a mesh structure, where each matrix entry is represented by
+a node, and each node is connected to the adjacent matrix entries/nodes. If `diagonal = true`, entries of the matrix
+are also connected to the nodes diagonal to them (i.e., entry (i,j) is connected to (i-1, j-1), (i + 1, j -1), etc.).
 """
-function matrix_to_graph(matrix::AbstractMatrix, attribute::String="weight")
+function matrix_to_graph(matrix::AbstractMatrix, diagonal::Bool = false, attribute::String = "weight")
 
     dim1, dim2 = size(matrix)
     dg = DataGraph()
@@ -60,6 +61,25 @@ function matrix_to_graph(matrix::AbstractMatrix, attribute::String="weight")
                     push!(edges, edge)
                     edge_map[edge] = length(edges)
                 end
+
+                if !diagonal
+                    # Add diagonal from top left to bottom right
+                    if i != dim1 && j != dim2
+                        edge = (i + column_offset, i + column_offset + dim1 + 1)
+                        push!(fadjlist[i + column_offset], i + column_offset + dim1 + 1)
+                        push!(fadjlist[i + column_offset + dim1 + 1], i + column_offset)
+                        push!(edges, edge)
+                        edge_map[edge] = length(edges)
+                    end
+                    # add diagonal from bottom left to top right
+                    if i != 1 && j != dim2
+                        edge = (i + column_offset, i + column_offset + dim1 - 1)
+                        push!(fadjlist[i + column_offset], i + column_offset + dim1 - 1)
+                        push!(fadjlist[i + column_offset + dim1 - 1], i + column_offset)
+                        push!(edges, edge)
+                        edge_map[edge] = length(edges)
+                    end
+                end
             end
         end
     end
@@ -77,6 +97,7 @@ function matrix_to_graph(matrix::AbstractMatrix, attribute::String="weight")
 
     return dg
 end
+
 """
     symmetric_matrix_to_graph(matrix; attribute="weight", tol = 1e-9)
 
