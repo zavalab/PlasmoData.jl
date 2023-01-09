@@ -22,7 +22,7 @@ the name `attribute`. If `diagonal = false`, the graph has a mesh structure, whe
 a node, and each node is connected to the adjacent matrix entries/nodes. If `diagonal = true`, entries of the matrix
 are also connected to the nodes diagonal to them (i.e., entry (i,j) is connected to (i-1, j-1), (i + 1, j -1), etc.).
 """
-function matrix_to_graph(matrix::AbstractMatrix, diagonal::Bool = false, attribute::String = "weight")
+function matrix_to_graph(matrix::AbstractMatrix, diagonal::Bool = true, attribute::String = "weight")
 
     dim1, dim2 = size(matrix)
     dg = DataGraph()
