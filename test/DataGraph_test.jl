@@ -1,6 +1,8 @@
 # Test add_node!
 nodes = [7, "node2", :node3, 17.5]
 
+nodes_as_strings = [string(i) for i in nodes]
+
 dg = DataGraph()
 for i in nodes
     add_node!(dg, i)
@@ -8,17 +10,15 @@ end
 
 @testset "add_node! test" begin
     @test length(dg.nodes) == length(nodes)
-    @test dg.nodes == nodes
+    @test dg.nodes == nodes_as_strings
     @test length(dg.g.fadjlist) == length(nodes)
-    @test length(dg.node_map) == length(nodes)
-    for (i, node) in enumerate(nodes)
-        @test dg.node_map[node] == i
-    end
 end
 
 # Test add_edge!
 
 edges = [(17.5, 7), (:node3, "node2"), (7, :node3)]
+
+edges_as_strings = [string(i) for i in edges]
 
 for (i, j) in edges
     DataGraphs.add_edge!(dg, i, j)

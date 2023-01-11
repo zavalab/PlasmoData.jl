@@ -51,6 +51,7 @@ for (train_data, val_data) in kfolds((Xs, ys); k = 5)
 end
 
 println(accuracy_values)
+println(mean(accuracy_values))
 
 
 # Plot the average EC curves for environment 1 and 2
