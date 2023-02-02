@@ -31,5 +31,7 @@ end
 
 include("DataGraph_test.jl")
 include("DataGraph_utils_test.jl")
+include("DataGraph_interface_test.jl")
 include("DataDiGraph_test.jl")
 include("DataDiGraph_utils_test.jl")
+include("DataDiGraph_interface_test.jl")

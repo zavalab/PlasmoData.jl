@@ -257,8 +257,6 @@ function remove_node!(dg::DataDiGraph, node_name)
         edges[last_edge_indices[offset + i]] = (last_edges[offset + i][1], node_num)
     end
 
-    println(edge_indices)
-    println(edges)
     if length(dg.edge_data.attributes) > 0
         edge_data = edge_data[setdiff(1:length(edges), edge_indices), :]
 

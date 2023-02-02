@@ -48,6 +48,8 @@ agg_graph = aggregate(dg, [1, 5], "new_node")
     @test (3, 5) in agg_graph.edges
     @test get_node_data(agg_graph)[:] == [2.0, 4.0, 1.0, 1.0, 1.5]
     @test get_edge_data(agg_graph)[:] == [1.0, 1.0, 3.0, 4.0, 2.0, 4.0]
+    @test_throws ErrorException aggregate(dg, [1,7], "new_node")
+    @test_throws ErrorException aggregate(dg, [1,5], 6)
 end
 
 remove_node!(dg, 2)
@@ -62,7 +64,9 @@ remove_node!(dg, 2)
     @test length(get_edge_data(dg)) == length(dg.edges)
     @test dg.nodes[2] == 6
     @test get_node_data(dg)[2] == 1
+    @test_throws ErrorException remove_node!(dg, 7)
 end
+
 
 remove_edge!(dg, 4, 6)
 
@@ -84,4 +88,6 @@ remove_edge!(dg, (1, 3))
     @test test_map(dg.edges, dg.edge_map)
     @test length(get_edge_data(dg)) == length(dg.edges)
     @test get_edge_data(dg)[:] == [1.0, 2.0, 2.0]
+    @test_throws ErrorException remove_edge!(dg, 1, 2)
+    @test_throws ErrorException remove_edge!(dg, 1, 6)
 end
