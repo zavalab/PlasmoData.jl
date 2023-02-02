@@ -46,7 +46,7 @@ end
 Returns the `NodeData` object from a DataGraph or DataDiGraph
 """
 function get_node_data(dg::D) where {D <: DataGraphUnion}
-    return dg.node_data
+    return dg.node_data.data
 end
 
 """
@@ -55,7 +55,7 @@ end
 Returns the `EdgeData` object from a DataGraph or DataDiGraph
 """
 function get_edge_data(dg::D) where {D <: DataGraphUnion}
-    return dg.edge_data
+    return dg.edge_data.data
 end
 
 """

@@ -4,14 +4,14 @@
         data = Array{Float64}(undef, (0, 0))
     )
 
-Constructor for building NodeData{T, M}
+Constructor for building NodeData{T, T1, M1}
 """
 function NodeData(
     attributes::Vector{String} = Vector{String}(),
-    attribute_map::Dict{String, Int} = Dict{String, Int}(),
-    data::M = Array{Float64}(undef, (0, 0))
-) where {T, M <: Matrix{T}}
-    NodeData{T, M}(
+    attribute_map::Dict{String, T} = Dict{String, Int}(),
+    data::M1 = Array{Float64}(undef, (0, 0))
+) where {T <: Real, T1, M1 <: AbstractMatrix{T1}}
+    NodeData{T, T1, M1}(
         attributes,
         attribute_map,
         data
@@ -24,14 +24,14 @@ end
         data = Array{Float64}(undef, (0, 0))
     )
 
-Constructor for building EdgeData{T, M}
+Constructor for building EdgeData{T, T2, M2}
 """
 function EdgeData(
     attributes::Vector{String} = Vector{String}(),
-    attribute_map::Dict{String, Int} = Dict{String, Int}(),
-    data::M = NamedArray{Float64}(undef, (0, 0))
-) where {T, M <: Matrix{T}}
-    EdgeData{T, M}(
+    attribute_map::Dict{String, T} = Dict{String, Int}(),
+    data::M2 = NamedArray{Float64}(undef, (0, 0))
+) where {T <: Real, T2, M2 <: AbstractMatrix{T2}}
+    EdgeData{T, T2, M2}(
         attributes,
         attribute_map,
         data
@@ -109,19 +109,19 @@ When T, T1, T2, M1, and M2 are not defined, the defaults are `Int`, `Float64`, `
 """
 function DataGraph{T, T1, T2, M1, M2}() where {T <: Integer, T1, T2,  M1 <: AbstractMatrix{T1}, M2 <: AbstractMatrix{T2}}
     nodes = Vector{Any}()
-    edges = Vector{Tuple{Int, Int}}()
+    edges = Vector{Tuple{T, T}}()
 
     ne = 0
-    fadjlist = Vector{Vector{Int}}()
+    fadjlist = Vector{Vector{T}}()
 
-    node_map = Dict{Any, Int}()
-    edge_map = Dict{Tuple{Int, Int}, Int}()
+    node_map = Dict{Any, T}()
+    edge_map = Dict{Tuple{T, T}, T}()
     node_attributes = String[]
     edge_attributes = String[]
-    node_attribute_map = Dict{String, Int}()
-    edge_attribute_map = Dict{String, Int}()
-    node_data = Array{Float64}(undef, 0, 0)
-    edge_data = Array{Float64}(undef, 0, 0)
+    node_attribute_map = Dict{String, T}()
+    edge_attribute_map = Dict{String, T}()
+    node_data = M1(undef, 0, 0)
+    edge_data = M2(undef, 0, 0)
 
     node_positions = [[0.0 0.0]]
 
@@ -203,11 +203,11 @@ function add_node!(
         push!(nodes,node_name)
         push!(dg.g.fadjlist, Vector{T}())
 
-        # If there are data currently defined on the other nodes, add a NaN value to
+        # If there are data currently defined on the other nodes, add a 0 value to
         # the end of the weight array for the new node
         if length(attributes)>0
             node_data = dg.node_data.data
-            row_to_add = fill(NaN, (1, length(attributes)))
+            row_to_add = fill(0, (1, length(attributes)))
             node_data = vcat(node_data, row_to_add)
             dg.node_data.data = node_data
         end
@@ -266,7 +266,7 @@ function add_edge!(dg::DataGraph, node1::N1, node2::N2) where {N1 <: Any, N2 <: 
 
         if length(attributes)>0
             edge_data  = dg.edge_data.data
-            row_to_add = fill(NaN, (1, length(attributes)))
+            row_to_add = fill(0, (1, length(attributes)))
             edge_data  = vcat(edge_data, row_to_add)
             dg.edge_data.data = edge_data
         end
@@ -309,7 +309,7 @@ function add_node_data!(dg::DataGraph, node::Any, node_weight::T, attribute::Str
         # Add new column to node_weight array
         push!(attributes, attribute)
         attribute_map[attribute] = length(attributes)
-        new_col = fill(NaN, (length(nodes), 1))
+        new_col = fill(0, (length(nodes), 1))
         node_data = hcat(node_data, new_col)
         node_data[node_map[node], attribute_map[attribute]] = node_weight
         dg.node_data.data = node_data
@@ -355,7 +355,7 @@ function add_edge_data!(dg::DataGraph, node1::Any, node2::Any, edge_weight::T, a
         # Add new column to node_weight array
         push!(attributes, attribute)
         attribute_map[attribute] = length(attributes)
-        new_col = fill(NaN, (length(edges), 1))
+        new_col = fill(0, (length(edges), 1))
         edge_data = hcat(edge_data, new_col)
         edge_data[edge_map[edge], attribute_map[attribute]] = edge_weight
         dg.edge_data.data = edge_data
@@ -373,6 +373,7 @@ end
 
 """
     adjacency_matrix(datagraph)
+    adjacency_matrix(datadigraph)
 
 Return the adjacency matrix of a DataGraph object
 """

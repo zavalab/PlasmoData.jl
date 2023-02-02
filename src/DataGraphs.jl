@@ -9,12 +9,12 @@ using LinearAlgebra
 export DataGraph, DataDiGraph, add_node!, add_node_data!, add_edge_data!, adjacency_matrix
 export get_EC, matrix_to_graph, symmetric_matrix_to_graph, mvts_to_graph, tensor_to_graph
 export filter_nodes, filter_edges, run_EC_on_nodes, run_EC_on_edges, aggregate, average_degree
-export get_node_data, get_edge_data, ne, nn, nv
+export get_node_data, get_edge_data, ne, nn, nv, remove_node!, remove_edge!
 
 abstract type AbstractDataGraph{T} <: Graphs.AbstractGraph{T} end
 
 """
-    NodeData{T, M}
+    NodeData{T, T1, M1}
 
 Object for building and storing data corresponding to the nodes of a graph. Data is stored
 in a matrix, but columns of the matrix have attribute names stored in this struct
@@ -27,14 +27,14 @@ NodeData have the following attributes:
  `data`: Matrix with the number of rows corresponding to the number of nodes in the graph
  and with a column for each attribute in `attributes`
 """
-mutable struct NodeData{T, M}
+mutable struct NodeData{T, T1, M1}
     attributes::Vector{String}
-    attribute_map::Dict{String, Int}
-    data::M
+    attribute_map::Dict{String, T}
+    data::AbstractMatrix{T1}
 end
 
 """
-    EdgeData{T, M}
+    EdgeData{T, T2, M2}
 
 Object for building and storing data corresponding to the edges of a graph. Data is stored
 in a matrix, but columns of the matrix have attribute names stored in this struct
@@ -47,10 +47,10 @@ EdgeData have the following attributes:
  `data`: Matrix with the number of rows corresponding to the number of edgess in the graph
  and with a column for each attribute in `attributes`
 """
-mutable struct EdgeData{T, M}
+mutable struct EdgeData{T, T2, M2}
     attributes::Vector{String}
-    attribute_map::Dict{String, Int}
-    data::M
+    attribute_map::Dict{String, T}
+    data::AbstractMatrix{T2}
 end
 
 """
@@ -76,8 +76,8 @@ mutable struct DataGraph{T, T1, T2, M1, M2} <: AbstractDataGraph{T}
     node_map::Dict{Any, T}
     edge_map::Dict{Tuple{T, T}, T}
 
-    node_data::NodeData{T1, M1}
-    edge_data::EdgeData{T2, M2}
+    node_data::NodeData{T, T1, M1}
+    edge_data::EdgeData{T, T2, M2}
 
     node_positions::Array{Union{GeometryBasics.Point{2,Float64}, Array{Float64, 2}},1}
 end
@@ -105,8 +105,8 @@ mutable struct DataDiGraph{T, T1, T2, M1, M2} <: AbstractDataGraph{T}
     node_map::Dict{Any, T}
     edge_map::Dict{Tuple{T, T}, T}
 
-    node_data::NodeData{T1, M1}
-    edge_data::EdgeData{T2, M2}
+    node_data::NodeData{T, T1, M1}
+    edge_data::EdgeData{T, T2, M2}
 
     node_positions::Array{Union{GeometryBasics.Point{2,Float64}, Array{Float64, 2}},1}
 end
@@ -121,6 +121,8 @@ DataGraphUnion = Union{DataGraph, DataDiGraph}
 
 include("datagraphs/core.jl")
 include("datadigraphs/core.jl")
+include("datadigraphs/utils.jl")
+include("datadigraphs/interface.jl")
 include("datagraphs/interface.jl")
 include("datagraphs/utils.jl")
 include("functions.jl")
