@@ -22,8 +22,14 @@ end
     @test_throws ErrorException get_edge_data(dg, 1, 6, "weight")
 end
 
-@testset "ne, nn, nv test" begin
+@testset "interface test" begin
     @test DataGraphs.ne(dg) == length(dg.edges)
     @test DataGraphs.nv(dg) == length(dg.nodes)
     @test nn(dg) == length(dg.nodes)
+    @test has_node(dg, 4)
+    @test !(has_node(dg, 7))
+    @test DataGraphs.has_edge(dg, 1, 3)
+    @test !(DataGraphs.has_edge(dg, 3, 1))
+    @test_throws ErrorException DataGraphs.has_edge(dg, 7, 3)
+    @test_throws ErrorException DataGraphs.has_edge(dg, 3, 7)
 end

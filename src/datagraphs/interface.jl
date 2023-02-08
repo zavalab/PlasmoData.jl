@@ -41,7 +41,7 @@ end
 """
     get_node_data(dg::D) where {D <: DataGraphUnion}
 
-Returns the `NodeData` object from a DataGraph or DataDiGraph
+Returns the `data` object from a DataGraph's or DataDiGraph's `NodeData`
 """
 function get_node_data(dg::D) where {D <: DataGraphUnion}
     return dg.node_data.data
@@ -50,10 +50,65 @@ end
 """
     get_edge_data(dg::D) where {D <: DataGraphUnion}
 
-Returns the `EdgeData` object from a DataGraph or DataDiGraph
+Returns the `data` object from a DataGraph's or DataDiGraph's `EdgeData`
 """
 function get_edge_data(dg::D) where {D <: DataGraphUnion}
     return dg.edge_data.data
+end
+
+"""
+    get_node_attributes(dg::D) where {D <: DataGraphUnion}
+
+Returns the list of attributes contained in the `NodeData` of `dg`
+"""
+function get_node_attributes(dg::D) where {D <: DataGraphUnion}
+    return dg.node_data.attributes
+end
+
+"""
+    get_edge_attributes(dg::D) where {D <: DataGraphUnion}
+
+Returns the list of attributes contained in the `EdgeData` of `dg`
+"""
+function get_edge_attributes(dg::D) where {D <: DataGraphUnion}
+    return dg.edge_data.attributes
+end
+
+"""
+    has_node(datagraph, node)
+    has_node(datadigraph, node)
+
+returns `true` if `node` is in the graph. Else return false
+"""
+function has_node(dg::D, node::Any) where {D <: DataGraphUnion}
+    if node in dg.nodes
+        return true
+    else
+        return false
+    end
+end
+
+"""
+    has_edge(datagraph, node1, node2)
+
+Return `true` if there is an edge between `node1` and `node2` in `datagraph`. Else return false
+"""
+function has_edge(dg::DataGraph, node1::Any, node2::Any)
+    if !(node1 in dg.nodes)
+        error("$node1 not defined in graph")
+    elseif !(node2 in dg.nodes)
+        error("$node2 not defined in graph")
+    end
+
+    node_map = dg.node_map
+
+    edge = _get_edge(node_map[node1], node_map[node2])
+
+    if edge in dg.edges
+        return true
+    else
+        return false
+    end
 end
 
 """

@@ -38,10 +38,25 @@ function get_edge_data(dg::DataDiGraph, edge_tuple::Tuple{Any, Any}, attribute::
     return get_edge_data(dg, edge_tuple[1], edge_tuple[2], attribute)
 end
 
-# Add set node_data
-# Add set edge_data
-# Add get_node positions
-# Add get_edge positions
-# Add number nodes
-# Add number edges
-# Consider changing interface functions; some functions apply to DataGraphUnions, and I should consider where to put these
+"""
+    has_edge(datagraph, node1, node2)
+
+Return `true` if there is an edge going from `node1` to `node2` in `datadigraph`. Else return false
+"""
+function has_edge(dg::DataDiGraph, node1, node2)
+    if !(node1 in dg.nodes)
+        error("$node1 not defined in graph")
+    elseif !(node2 in dg.nodes)
+        error("$node2 not defined in graph")
+    end
+
+    node_map = dg.node_map
+
+    if (node_map[node1], node_map[node2]) in dg.edges
+        return true
+    else
+        return false
+    end
+end
+
+# get_node positions

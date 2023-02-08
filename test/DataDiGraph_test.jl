@@ -22,9 +22,22 @@ add_node_data!(dg, nodes[4], node_data[4], "weight")
 add_node_data!(dg, nodes[1], node_data[1], "weight")
 add_node_data!(dg, nodes[3], node_data[3], "weight")
 
-@testset "add_node_data!" begin
+@testset "add_node_data! test" begin
     @test dg.node_data.data[:, 1] == node_data
     @test dg.node_data.attributes == ["weight"]
+end
+
+# Test add_node_attribute!
+
+add_node_attribute!(dg, "weight2", 1.0)
+
+@testset "add_node_attribute! test" begin
+    @test size(get_node_data(dg)) == (length(dg.nodes), 2)
+    @test dg.node_data.attributes == ["weight", "weight2"]
+    @test dg.node_data.attribute_map["weight2"] == 2
+    @test all(i -> i == 1.0, get_node_data(dg)[:, 2])
+    @test_throws ErrorException add_node_attribute!(dg, "weight", 0.0)
+    @test get_node_attributes(dg) == ["weight", "weight2"]
 end
 
 # Test add_edge! function 1
@@ -106,6 +119,19 @@ add_edge_data!(dg, edges[2], edge_data[2], "weight")
 @testset "add_edge_data! test 2" begin
     @test dg.edge_data.data[:, 1] == edge_data
     @test dg.edge_data.attributes == ["weight"]
+end
+
+# Test add_edge_attribute!
+
+add_edge_attribute!(dg, "weight2", 1.0)
+
+@testset "add_edge_attribute! test" begin
+    @test size(get_edge_data(dg)) == (length(dg.edges), 2)
+    @test dg.edge_data.attributes == ["weight", "weight2"]
+    @test dg.edge_data.attribute_map["weight2"] == 2
+    @test all(i -> i == 1.0, get_edge_data(dg)[:, 2])
+    @test_throws ErrorException add_edge_attribute!(dg, "weight", 0.0)
+    @test get_edge_attributes(dg) == ["weight", "weight2"]
 end
 
 # Test adjacency matrix constructor
