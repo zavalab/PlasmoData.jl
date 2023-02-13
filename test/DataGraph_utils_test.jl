@@ -103,7 +103,6 @@ remove_node!(dg, (1, 3))
     @test get_node_data(dg)[7] == 1
 end
 
-
 sym_matrix = matrix + matrix'
 
 dg = symmetric_matrix_to_graph(sym_matrix)

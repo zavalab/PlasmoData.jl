@@ -8,10 +8,11 @@ using LinearAlgebra
 
 export DataGraph, DataDiGraph, add_node!, add_node_data!, add_edge_data!, adjacency_matrix
 export get_EC, matrix_to_graph, symmetric_matrix_to_graph, mvts_to_graph, tensor_to_graph
-export filter_nodes, filter_edges, run_EC_on_nodes, run_EC_on_edges, aggregate, average_degree
+export filter_nodes, filter_edges, run_EC_on_nodes, run_EC_on_edges, aggregate
 export get_node_data, get_edge_data, ne, nn, nv, remove_node!, remove_edge!
-export add_node_attribute!, add_edge_attribute!, has_edge, has_node
-export get_node_attributes, get_edge_attributes
+export add_node_attribute!, add_edge_attribute!, has_edge, has_node, has_path
+export get_node_attributes, get_edge_attributes, get_path
+export nodes_to_index, index_to_nodes, average_degree
 
 abstract type AbstractDataGraph{T} <: Graphs.AbstractGraph{T} end
 
@@ -53,6 +54,46 @@ mutable struct EdgeData{T, T2, M2}
     attributes::Vector{String}
     attribute_map::Dict{String, T}
     data::AbstractMatrix{T2}
+end
+
+"""
+    NodeData(attributes = Vector{String}(),
+        attribute_map = Dict{String, Int}(),
+        data = Array{Float64}(undef, (0, 0))
+    )
+
+Constructor for building NodeData{T, T1, M1}
+"""
+function NodeData(
+    attributes::Vector{String} = Vector{String}(),
+    attribute_map::Dict{String, T} = Dict{String, Int}(),
+    data::M1 = Array{Float64}(undef, (0, 0))
+) where {T <: Real, T1, M1 <: AbstractMatrix{T1}}
+    NodeData{T, T1, M1}(
+        attributes,
+        attribute_map,
+        data
+    )
+end
+
+"""
+    EdgeData(attributes = Vector{String}(),
+        attribute_map = Dict{String, Int}(),
+        data = Array{Float64}(undef, (0, 0))
+    )
+
+Constructor for building EdgeData{T, T2, M2}
+"""
+function EdgeData(
+    attributes::Vector{String} = Vector{String}(),
+    attribute_map::Dict{String, T} = Dict{String, Int}(),
+    data::M2 = NamedArray{Float64}(undef, (0, 0))
+) where {T <: Real, T2, M2 <: AbstractMatrix{T2}}
+    EdgeData{T, T2, M2}(
+        attributes,
+        attribute_map,
+        data
+    )
 end
 
 """
@@ -119,7 +160,11 @@ end
 Data type that is a union of DataGraph and DataDiGraph; used for functions that apply to
 both data types
 """
-DataGraphUnion = Union{DataGraph, DataDiGraph}
+DataGraphUnion = Union{DataGraph{T}, DataDiGraph{T}} where T
+
+function Base.eltype(datagraph::D) where {D <: DataGraphUnion}
+    return eltype(eltype(datagraph.g.fadjlist))
+end
 
 include("datagraphs/core.jl")
 include("datadigraphs/core.jl")
@@ -128,5 +173,6 @@ include("datadigraphs/interface.jl")
 include("datagraphs/interface.jl")
 include("datagraphs/utils.jl")
 include("functions.jl")
+include("interface.jl")
 
 end

@@ -39,56 +39,6 @@ function get_edge_data(dg::DataGraph, edge_tuple::Tuple{Any, Any}, attribute::St
 end
 
 """
-    get_node_data(dg::D) where {D <: DataGraphUnion}
-
-Returns the `data` object from a DataGraph's or DataDiGraph's `NodeData`
-"""
-function get_node_data(dg::D) where {D <: DataGraphUnion}
-    return dg.node_data.data
-end
-
-"""
-    get_edge_data(dg::D) where {D <: DataGraphUnion}
-
-Returns the `data` object from a DataGraph's or DataDiGraph's `EdgeData`
-"""
-function get_edge_data(dg::D) where {D <: DataGraphUnion}
-    return dg.edge_data.data
-end
-
-"""
-    get_node_attributes(dg::D) where {D <: DataGraphUnion}
-
-Returns the list of attributes contained in the `NodeData` of `dg`
-"""
-function get_node_attributes(dg::D) where {D <: DataGraphUnion}
-    return dg.node_data.attributes
-end
-
-"""
-    get_edge_attributes(dg::D) where {D <: DataGraphUnion}
-
-Returns the list of attributes contained in the `EdgeData` of `dg`
-"""
-function get_edge_attributes(dg::D) where {D <: DataGraphUnion}
-    return dg.edge_data.attributes
-end
-
-"""
-    has_node(datagraph, node)
-    has_node(datadigraph, node)
-
-returns `true` if `node` is in the graph. Else return false
-"""
-function has_node(dg::D, node::Any) where {D <: DataGraphUnion}
-    if node in dg.nodes
-        return true
-    else
-        return false
-    end
-end
-
-"""
     has_edge(datagraph, node1, node2)
 
 Return `true` if there is an edge between `node1` and `node2` in `datagraph`. Else return false
@@ -110,35 +60,3 @@ function has_edge(dg::DataGraph, node1::Any, node2::Any)
         return false
     end
 end
-
-"""
-    ne(dg::D) where {D <: DataGraphUnion}
-
-Returns the number of edges in a DataGraph or DataDiGraph
-"""
-function ne(dg::D) where {D <: DataGraphUnion}
-    length(dg.edges)
-end
-
-"""
-    nn(dg::D) where {D <: DataGraphUnion}
-    nv(dg::D) where {D <: DataGraphUnion}
-
-Returns the number of nodes (vertices) in a DataGraph or DataDiGraph
-"""
-function nn(dg::D) where {D <: DataGraphUnion}
-    length(dg.nodes)
-end
-
-function nv(dg::D) where {D <: DataGraphUnion}
-    nn(dg)
-end
-
-
-# Add set node_data
-# Add set edge_data
-# Add get_node positions
-# Add get_edge positions
-# Add number nodes
-# Add number edges
-# Consider changing interface functions; some functions apply to DataGraphUnions, and I should consider where to put these
