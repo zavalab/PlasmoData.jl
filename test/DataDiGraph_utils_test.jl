@@ -52,21 +52,6 @@ agg_graph = aggregate(dg, [1, 5], "new_node")
     @test_throws ErrorException aggregate(dg, [1,5], 6)
 end
 
-@testset "pathway functions" begin
-    @test DataGraphs.has_path(dg, 1, 6)
-    @test DataGraphs.has_path(dg, 1, 4, 6)
-    @test get_path(dg, 1, 6) == [1, 4, 6]
-    @test get_path(dg, 1, 4, 6) == [1, 4, 6]
-    @test get_path(dg, 1, 6; algorithm = "BellmanFord") == [1, 4, 6]
-    @test get_path(dg, 1, 4, 6; algorithm = "BellmanFord") == [1, 4, 6]
-    @test_throws ErrorException DataGraphs.has_path(dg, 1, 7)
-    @test_throws ErrorException DataGraphs.has_path(dg, 1, 7, 4)
-    @test_throws ErrorException get_path(dg, 7, 3)
-    @test_throws ErrorException get_path(dg, 1, 3, 7)
-end
-
-@test average_degree(dg) == length(dg.edges) * 2 / length(dg.nodes)
-
 remove_node!(dg, 2)
 
 @testset "remove_node! test" begin

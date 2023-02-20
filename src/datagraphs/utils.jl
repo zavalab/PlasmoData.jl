@@ -363,7 +363,6 @@ function filter_nodes(dg::DataGraph, filter_val::R; attribute::String=dg.node_da
     edge_data          = dg.edge_data.data
     edge_map           = dg.edge_map
     edges              = dg.edges
-    node_positions     = dg.node_positions
 
     if length(node_attributes) == 0
         error("No node weights are defined")
@@ -385,13 +384,6 @@ function filter_nodes(dg::DataGraph, filter_val::R; attribute::String=dg.node_da
 
     new_nodes     = nodes[bool_vec]
     new_node_data = node_data[bool_vec, :]
-
-    if length(node_positions) > 0 && length(node_positions) == length(nodes)
-        new_node_pos = node_positions[bool_vec]
-        new_dg.node_positions  = new_node_pos
-    else
-        new_node_pos = [[0.0 0.0]]
-    end
 
     new_node_map = Dict()
 
@@ -443,7 +435,6 @@ function filter_nodes(dg::DataGraph, filter_val::R; attribute::String=dg.node_da
     new_dg.node_data.attributes = node_attributes
     new_dg.edge_data.attributes = edge_attributes
     new_dg.node_data.data       = new_node_data
-    new_dg.node_positions       = new_node_pos
     new_dg.node_data.attribute_map = dg.node_data.attribute_map
 
     return new_dg
@@ -514,7 +505,6 @@ function filter_edges(dg::DataGraph, filter_val::R; attribute::String = dg.edge_
     new_dg.edge_map             = new_edge_map
     new_dg.node_data.attributes = node_attributes
     new_dg.edge_data.attributes = edge_attributes
-    new_dg.node_positions       = dg.node_positions
     new_dg.node_data.data       = dg.node_data.data
 
     new_dg.node_data.attribute_map = dg.node_data.attribute_map
@@ -612,7 +602,6 @@ function remove_node!(dg::DataGraph, node_name::Any)
     edge_map = dg.edge_map
     node_data = dg.node_data.data
     edge_data = dg.edge_data.data
-    node_pos  = dg.node_positions
 
     node_num  = node_map[node_name]
     node_fadj = dg.g.fadjlist[node_num]
@@ -620,14 +609,6 @@ function remove_node!(dg::DataGraph, node_name::Any)
     last_node_name  = nodes[length(nodes)]
     old_node_length = length(nodes)
     last_node_fadj  = dg.g.fadjlist[old_node_length]
-
-    if length(node_pos) == length(nodes)
-        last_node_pos = node_pos[old_node_length]
-        deleteat!(node_pos, node_num)
-        pop!(node_pos)
-        insert!(node_pos, node_num, last_node_pos)
-        dg.node_positions = node_pos
-    end
 
     if length(dg.node_data.attributes) > 0
         node_data_order = [i for i in 1:(length(nodes) - 1)]
@@ -758,7 +739,6 @@ function aggregate(dg::DataGraph, node_set, new_name)
     node_data          = dg.node_data.data
     node_attributes    = dg.node_data.attributes
     node_attribute_map = dg.node_data.attribute_map
-    node_positions     = dg.node_positions
 
     if !(issubset(node_set, nodes))
         undef_nodes = setdiff(node_set, nodes)
@@ -809,22 +789,6 @@ function aggregate(dg::DataGraph, node_set, new_name)
         new_dg.node_data.attributes    = node_attributes
         new_dg.node_data.attribute_map = node_attribute_map
         new_dg.node_data.data          = new_node_data
-    end
-
-    if length(node_positions) > 1
-        new_node_positions = node_positions[indices_to_keep]
-        old_pos            = node_positions[agg_node_indices]
-
-        xvals = 0
-        yvals = 0
-
-        for j in 1:length(node_set)
-            xvals += old_pos[j][1]
-            yvals += old_pos[j][2]
-        end
-
-        push!(new_node_positions, Point(xvals/length(node_set), yvals/length(node_set)))
-        new_dg.node_positions = new_node_positions
     end
 
     edges              = dg.edges

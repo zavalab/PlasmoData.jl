@@ -19,8 +19,6 @@ end
 
 dg = matrix_to_graph(random_matrix, true, "matrix_value")
 
-
-
 @testset "function tests" begin
     @test nodes_to_index(dg, Graphs.connected_components(dg)[1]) == Graphs.connected_components(dg.g)[1]
     @test Graphs.connected_components(ddg) == Graphs.connected_components(ddg.g)

@@ -22,6 +22,9 @@ end
     @test_throws ErrorException get_edge_data(dg, 1, 6, "weight")
 end
 
+rename_node_attribute!(dg, "weight", "weight1")
+rename_edge_attribute!(dg, "weight", "weight1")
+
 @testset "interface test" begin
     @test DataGraphs.ne(dg) == length(dg.edges)
     @test DataGraphs.nv(dg) == length(dg.nodes)
@@ -33,4 +36,10 @@ end
     @test !(DataGraphs.has_edge(dg, 2, 5))
     @test_throws ErrorException DataGraphs.has_edge(dg, 7, 3)
     @test_throws ErrorException DataGraphs.has_edge(dg, 3, 7)
+    @test dg.node_data.attributes == ["weight1"]
+    @test dg.node_data.attribute_map["weight1"] == 1
+    @test dg.edge_data.attributes == ["weight1"]
+    @test dg.edge_data.attribute_map["weight1"] == 1
+    @test_throws ErrorException rename_node_attribute!(dg, "wrong_weight", "weight")
+    @test_throws ErrorException rename_edge_attribute!(dg, "wrong_weight", "weight")
 end
