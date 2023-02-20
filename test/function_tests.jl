@@ -96,3 +96,4 @@ end
 
 @test index_to_nodes(dg, [1, 4, 7]) == [(1, 1), (1, 2), (1, 3)]
 @test nodes_to_index(dg, [(1, 1), (1, 2), (1, 3)]) == [1, 4, 7]
+@test_throws ErrorException index_to_nodes(dg, [1, 4, 10])

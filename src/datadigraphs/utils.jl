@@ -5,7 +5,12 @@ Removes the nodes of the graph whose weight value of `attribute_name` is greater
 `filter_value`. If `attribute_name` is not specified, this defaults to the first attribute within
 the DataGraph's `NodeData`.
 """
-function filter_nodes(dg::DataDiGraph, filter_val::R; attribute::String=dg.node_data.attributes[1]) where {R <: Real}
+function filter_nodes(
+    dg::DataDiGraph,
+    filter_val::R;
+    attribute::String=dg.node_data.attributes[1]
+) where {R <: Real}
+
     node_attributes    = dg.node_data.attributes
     edge_attributes    = dg.edge_data.attributes
     node_attribute_map = dg.node_data.attribute_map
@@ -26,8 +31,9 @@ function filter_nodes(dg::DataDiGraph, filter_val::R; attribute::String=dg.node_
     M1 = typeof(get_node_data(dg))
     T2 = eltype(get_edge_data(dg))
     M2 = typeof(get_edge_data(dg))
+    T3 = eltype(get_graph_data(dg))
 
-    new_dg = DataDiGraph{T, T1, T2, M1, M2}()
+    new_dg = DataDiGraph{T, T1, T2, T3, M1, M2}()
 
     am = Graphs.LinAlg.adjacency_matrix(dg.g)
 
@@ -101,7 +107,12 @@ Removes the edges of the graph whose weight value of `attribute_name` is greater
 `filter_value`. If `attribute_name` is not specified, this defaults to the first attribute within
 the DataGraph's `EdgeData`.
 """
-function filter_edges(dg::DataDiGraph, filter_val::R; attribute::String = dg.edge_data.attributes[1]) where {R <: Real}
+function filter_edges(
+    dg::DataDiGraph,
+    filter_val::R;
+    attribute::String = dg.edge_data.attributes[1]
+) where {R <: Real}
+
     nodes           = dg.nodes
     edges           = dg.edges
     node_attributes = dg.node_data.attributes
@@ -121,6 +132,7 @@ function filter_edges(dg::DataDiGraph, filter_val::R; attribute::String = dg.edg
     M1 = typeof(get_node_data(dg))
     T2 = eltype(get_edge_data(dg))
     M2 = typeof(get_edge_data(dg))
+    T3 = eltype(get_graph_data(dg))
 
     bool_vec = dg.edge_data.data[:, edge_attribute_map[attribute]] .< filter_val
 
@@ -146,7 +158,7 @@ function filter_edges(dg::DataDiGraph, filter_val::R; attribute::String = dg.edg
         insert!(node_neighbors, index, node1)
     end
 
-    new_dg = DataDiGraph{T, T1, T2, M1, M2}()
+    new_dg = DataDiGraph{T, T1, T2, T3, M1, M2}()
 
     simple_digraph = Graphs.SimpleDiGraph(T(length(new_edges)), fadjlist, badjlist)
 
@@ -171,7 +183,11 @@ end
 
 Removes the node (and any node data) from `datadigraph`
 """
-function remove_node!(dg::DataDiGraph, node_name)
+function remove_node!(
+    dg::DataDiGraph,
+    node_name::N
+) where {N <: Any}
+
     if !(node_name in dg.nodes)
         error("$node_name is not defined in the DataGraph")
     end
@@ -266,7 +282,12 @@ end
 
 Remove the directed edge from node1 to node2 from the datadigraph.
 """
-function remove_edge!(dg::DataDiGraph, node1::Any, node2::Any)
+function remove_edge!(
+    dg::DataDiGraph,
+    node1::N1,
+    node2::N2
+) where {N1 <: Any, N2 <: Any}
+
     nodes = dg.nodes
     edges = dg.edges
     node_map = dg.node_map
@@ -316,7 +337,10 @@ function remove_edge!(dg::DataDiGraph, node1::Any, node2::Any)
     return true
 end
 
-function remove_edge!(dg::DataDiGraph, edge::Tuple{Any, Any})
+function remove_edge!(
+    dg::DataDiGraph,
+    edge::Tuple
+)
     remove_edge!(dg, edge[1], edge[2])
 end
 
@@ -328,7 +352,12 @@ If nodes have any weight/attribute values defined, These are averaged across all
 `node_list`. Edge weights are also averaged when two or more nodes in the `node_list` are connected
 to the same node and these edges have weights defined on them.
 """
-function aggregate(dg::DataDiGraph, node_set, new_name)
+function aggregate(
+    dg::DataDiGraph,
+    node_set::Vector,
+    new_name::N
+) where {N <: Any}
+
     nodes              = dg.nodes
     node_map           = dg.node_map
     node_data          = dg.node_data.data
@@ -353,8 +382,9 @@ function aggregate(dg::DataDiGraph, node_set, new_name)
     M1 = typeof(get_node_data(dg))
     T2 = eltype(get_edge_data(dg))
     M2 = typeof(get_edge_data(dg))
+    T3 = eltype(get_graph_data(dg))
 
-    new_dg = DataDiGraph{T, T1, T2, M1, M2}()
+    new_dg = DataDiGraph{T, T1, T2, T3, M1, M2}()
 
     new_nodes = setdiff(nodes, node_set)
     push!(new_nodes, new_name)

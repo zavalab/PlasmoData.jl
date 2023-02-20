@@ -206,6 +206,21 @@ add_edge_dataset!(dg4, edge_data_dict, "weight4")
     @test get_edge_data(dg4)[:, 1][:] == [0.2, 0.5, 0.33]
 end
 
+# Test graph_data
+
+add_graph_data!(dg, 1.0, "class1")
+add_graph_data!(dg, 0.0, "class2")
+
+@testset "graph_data tests" begin
+    @test get_graph_data(dg) == [1.0, 0.0]
+    @test get_graph_attributes(dg) == ["class1", "class2"]
+    @test_throws ErrorException rename_graph_attribute!(dg, "class3", "class4")
+    rename_graph_attribute!(dg, "class2", "class3")
+    add_graph_data!(dg, 2.0, "class3")
+    @test get_graph_data(dg) == [1.0, 2.0]
+    @test get_graph_attributes(dg) == ["class1", "class3"]
+end
+
 # Test adjacency matrix constructor
 
 adj_mat = sparse([1, 1, 2, 3, 3, 4, 2, 3, 5, 4, 5, 5],
@@ -231,12 +246,14 @@ dg = DataDiGraph(adj_mat)
     @test (5, 4) in dg.edges
 end
 
-dg = DataDiGraph{Int8, Float32, Float32, Matrix{Float32}, Matrix{Float32}}()
+dg = DataDiGraph{Int8, Float32, Float32, Float32, Matrix{Float32}, Matrix{Float32}}()
 
 @testset "DataDiGraph Typing" begin
     @test eltype(dg) == Int8
     @test typeof(get_node_data(dg)) == Matrix{Float32}
     @test typeof(get_edge_data(dg)) == Matrix{Float32}
+    @test typeof(get_graph_data(dg)) == Vector{Float32}
     @test eltype(get_node_data(dg)) == Float32
     @test eltype(get_edge_data(dg)) == Float32
+    @test eltype(get_graph_data(dg)) == Float32
 end

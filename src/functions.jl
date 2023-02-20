@@ -1,4 +1,6 @@
-function Graphs.connected_components(dg::D) where {D <: DataGraphUnion}
+function Graphs.connected_components(
+    dg::D
+) where {D <: DataGraphUnion}
     connected_components_list = Graphs.connected_components(dg.g)
 
     nodes  = dg.nodes
@@ -11,85 +13,137 @@ function Graphs.connected_components(dg::D) where {D <: DataGraphUnion}
     return components
 end
 
-function Graphs.is_connected(dg::D) where {D <: DataGraphUnion}
+function Graphs.is_connected(
+    dg::D
+) where {D <: DataGraphUnion}
     return Graphs.is_connected(dg.g)
 end
 
-function Graphs.common_neighbors(dg::D, node1::Any, node2::Any) where {D <: DataGraphUnion}
+function Graphs.common_neighbors(
+    dg::D,
+    node1::Any,
+    node2::Any
+) where {D <: DataGraphUnion}
+
     node_map = dg.node_map
     cn = Graphs.common_neighbors(dg.g, node_map[node1], node_map[node2])
 
     return index_to_nodes(dg, cn)
 end
 
-function Graphs.common_neighbors(dg::D, node1::Int, node2::Int) where {D <: DataGraphUnion}
+function Graphs.common_neighbors(
+    dg::D,
+    node1::Int,
+    node2::Int
+) where {D <: DataGraphUnion}
+
     node_map = dg.node_map
     cn = Graphs.common_neighbors(dg.g, node_map[node1], node_map[node2])
 
     return index_to_nodes(dg, cn)
 end
 
-function Graphs.neighbors(dg::D, node::Any) where {D <: DataGraphUnion}
+function Graphs.neighbors(
+    dg::D,
+    node::Any
+) where {D <: DataGraphUnion}
+
     node_map = dg.node_map
     neighbor_list = Graphs.neighbors(dg.g, node_map[node])
 
     return index_to_nodes(dg, neighbor_list)
 end
 
-function Graphs.neighbors(dg::D, node::Int) where {D <: DataGraphUnion}
+function Graphs.neighbors(
+    dg::D,
+    node::Int
+) where {D <: DataGraphUnion}
+
     node_map = dg.node_map
     neighbor_list = Graphs.neighbors(dg.g, node_map[node])
 
     return index_to_nodes(dg, neighbor_list)
 end
 
-function Graphs.core_number(dg::D) where {D <: DataGraphUnion}
+function Graphs.core_number(
+    dg::D
+) where {D <: DataGraphUnion}
     return Graphs.core_number(dg.g)
 end
 
-function Graphs.k_core(dg::D, k = -1) where {D <: DataGraphUnion}
+function Graphs.k_core(
+    dg::D,
+    k = -1
+) where {D <: DataGraphUnion}
+
     k_core_index = Graphs.k_core(dg.g, k)
     return dg.nodes[k_core_index]
 end
 
-function Graphs.k_shell(dg::D, k = -1) where {D <: DataGraphUnion}
+function Graphs.k_shell(
+    dg::D,
+    k = -1
+) where {D <: DataGraphUnion}
+
     k_shell_index = Graphs.k_shell(dg.g, k)
     return dg.nodes[k_shell_index]
 end
 
-function Graphs.k_crust(dg::D, k = -1) where {D <: DataGraphUnion}
+function Graphs.k_crust(
+    dg::D,
+    k = -1
+) where {D <: DataGraphUnion}
+
     k_crust_index = Graphs.k_crust(dg.g, k)
     return dg.nodes[k_crust_index]
 end
 
-function Graphs.eccentricity(dg::D, node::Any) where {D <: DataGraphUnion}
+function Graphs.eccentricity(
+    dg::D,
+    node::Any
+) where {D <: DataGraphUnion}
+
     node_map = dg.node_map
     return Graphs.eccentricity(dg.g, node_map[node])
 end
 
-function Graphs.eccentricity(dg::D, node::Int) where {D <: DataGraphUnion}
+function Graphs.eccentricity(
+    dg::D,
+    node::Int
+) where {D <: DataGraphUnion}
+
     node_map = dg.node_map
     return Graphs.eccentricity(dg.g, node_map[node])
 end
 
-function Graphs.diameter(dg::D) where {D <: DataGraphUnion}
+function Graphs.diameter(
+    dg::D
+) where {D <: DataGraphUnion}
     return Graphs.diameter(dg.g)
 end
 
-function Graphs.periphery(dg::D) where {D <: DataGraphUnion}
+function Graphs.periphery(
+    dg::D
+) where {D <: DataGraphUnion}
     return Graphs.periphery(dg.g)
 end
 
-function Graphs.radius(dg::D) where {D <: DataGraphUnion}
+function Graphs.radius(
+    dg::D
+) where {D <: DataGraphUnion}
     return Graphs.radius(dg.g)
 end
 
-function Graphs.center(dg::D) where {D <: DataGraphUnion}
+function Graphs.center(
+    dg::D
+) where {D <: DataGraphUnion}
     return index_to_nodes(dg, Graphs.center(dg.g))
 end
 
+function Graphs.cycle_basis(
+    dg::D
+) where {D <: DataGraphUnion}
 
-function Graphs.cycle_basis(dg::D) where {D <: DataGraphUnion}
     numbered_cycles = Graphs.cycle_basis(dg.g)
 
     nodes  = dg.nodes
@@ -102,53 +156,87 @@ function Graphs.cycle_basis(dg::D) where {D <: DataGraphUnion}
     return cycles
 end
 
-function Graphs.indegree(dg::D) where {D <: DataGraphUnion}
+function Graphs.indegree(
+    dg::D
+) where {D <: DataGraphUnion}
     return Graphs.indegree(dg.g)
 end
 
-function Graphs.indegree(dg::D, node::Any) where {D <: DataGraphUnion}
+function Graphs.indegree(
+    dg::D,
+    node::T
+) where {D <: DataGraphUnion, T <: Any}
+
     node_map = dg.node_map
     return Graphs.indegree(dg.g, node_map[node])
 end
 
-function Graphs.indegree(dg::D, node::Int) where {D <: DataGraphUnion}
+function Graphs.indegree(
+    dg::D,
+    node::Int
+) where {D <: DataGraphUnion}
+
     node_map = dg.node_map
     return Graphs.indegree(dg.g, node_map[node])
 end
 
-function Graphs.outdegree(dg::D) where {D <: DataGraphUnion}
+function Graphs.outdegree(
+    dg::D
+) where {D <: DataGraphUnion}
     return Graphs.outdegree(dg.g)
 end
 
-function Graphs.outdegree(dg::D, node::Any) where {D <: DataGraphUnion}
+function Graphs.outdegree(
+    dg::D,
+    node::T
+ ) where {D <: DataGraphUnion, T <: Any}
+
     node_map = dg.node_map
     return Graphs.outdegree(dg.g, node_map[node])
 end
 
-function Graphs.outdegree(dg::D, node::Int) where {D <: DataGraphUnion}
+function Graphs.outdegree(
+    dg::D,
+    node::Int
+) where {D <: DataGraphUnion}
+
     node_map = dg.node_map
     return Graphs.outdegree(dg.g, node_map[node])
 end
 
-function Graphs.degree(dg::D) where {D <: DataGraphUnion}
+function Graphs.degree(
+    dg::D
+) where {D <: DataGraphUnion}
     return Graphs.degree(dg.g)
 end
 
-function Graphs.degree(dg::D, node::Any) where {D <: DataGraphUnion}
+function Graphs.degree(
+    dg::D,
+    node::T
+) where {D <: DataGraphUnion, T <: Any}
+
     node_map = dg.node_map
     return Graphs.degree(dg.g, node_map[node])
 end
 
-function Graphs.degree(dg::D, node::Int) where {D <: DataGraphUnion}
+function Graphs.degree(
+    dg::D,
+    node::Int
+) where {D <: DataGraphUnion}
+
     node_map = dg.node_map
     return Graphs.degree(dg.g, node_map[node])
 end
 
-function Graphs.degree_histogram(dg::D) where {D <: DataGraphUnion}
+function Graphs.degree_histogram(
+    dg::D
+) where {D <: DataGraphUnion}
     return degree_histogram(dg.g)
 end
 
-function Graphs.degree_centrality(dg::D) where {D <: DataGraphUnion}
+function Graphs.degree_centrality(
+    dg::D
+) where {D <: DataGraphUnion}
     return degree_centrality(dg.g)
 end
 
@@ -157,7 +245,10 @@ end
 
 Returns the average degree for `datagraph`
 """
-function average_degree(dg::D) where {D <: DataGraphUnion}
+function average_degree(
+    dg::D
+) where {D <: DataGraphUnion}
+
     degrees = Graphs.degree(dg)
     return sum(degrees) / length(degrees)
 end
@@ -167,7 +258,12 @@ end
 
 Returns true if a path exists in the `datagraph` between `src_node` to `dst_node`. Else returns false
 """
-function has_path(dg::D, src_node::Any, dst_node::Any) where {D <: DataGraphUnion}
+function has_path(
+    dg::D,
+    src_node::T1,
+    dst_node::T2
+) where {D <: DataGraphUnion, T1 <: Any, T2 <: Any}
+
     node_map = dg.node_map
     nodes    = dg.nodes
 
@@ -187,7 +283,13 @@ end
 Returns true if a path exists in the `datagraph` between `src_node` and `dst_node` which
 passes through the `intermediate node`. Else returns false
 """
-function has_path(dg::D, src_node, intermediate_node, dst_node) where {D <: DataGraphUnion}
+function has_path(
+    dg::D,
+    src_node::T1,
+    intermediate_node::T2,
+    dst_node::T3
+) where {D <: DataGraphUnion, T1 <: Any, T2 <: Any, T3 <: Any}
+
     node_map = dg.node_map
     nodes    = dg.nodes
 
@@ -214,7 +316,13 @@ Shortest path is computed by Dijkstra's algorithm
 
 `algorithm` is a string key word. Options are limited to "Dijkstra", "BellmanFord"
 """
-function get_path(dg::D, src_node, dst_node; algorithm = "Dijkstra") where {D <: DataGraphUnion}
+function get_path(
+    dg::D,
+    src_node::T1,
+    dst_node::T2;
+    algorithm::String = "Dijkstra"
+) where {D <: DataGraphUnion, T1 <: Any, T2 <: Any}
+
     node_map = dg.node_map
     nodes    = dg.nodes
 
@@ -259,11 +367,11 @@ which passes through `intermediate node`.
 """
 function get_path(
     dg::D,
-    src_node::Any,
-    intermediate_node::Any,
-    dst_node::Any;
+    src_node::T1,
+    intermediate_node::T2,
+    dst_node::T3;
     algorithm = "Dijkstra"
-) where {D <: DataGraphUnion}
+) where {D <: DataGraphUnion, T1 <: Any, T2 <: Any, T3 <: Any}
 
     node_map = dg.node_map
     nodes    = dg.nodes
@@ -317,7 +425,11 @@ end
 
 From a list of nodes in the `datagraph`, return a list of their corresponding integer indices
 """
-function nodes_to_index(dg::D, node_list::Vector) where {D <: DataGraphUnion}
+function nodes_to_index(
+    dg::D,
+    node_list::Vector
+) where {D <: DataGraphUnion}
+
     nodes = dg.nodes
     node_map = dg.node_map
 
@@ -340,9 +452,12 @@ end
 
 From a list of integer indeices, return a list of corresponding nodes in the `datagraph`
 """
-function index_to_nodes(dg::D, index_list::Vector) where {D <: DataGraphUnion}
+function index_to_nodes(
+    dg::D,
+    index_list::Vector
+) where {D <: DataGraphUnion}
+
     nodes = dg.nodes
-    node_map = dg.node_map
 
     if !(all(x -> x <= length(nodes), index_list))
         error("Value(s) in index_list are larger than the number of nodes in DataGraph")

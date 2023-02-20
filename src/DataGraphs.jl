@@ -11,8 +11,9 @@ export filter_nodes, filter_edges, run_EC_on_nodes, run_EC_on_edges, aggregate
 export get_node_data, get_edge_data, ne, nn, nv, remove_node!, remove_edge!
 export add_node_attribute!, add_edge_attribute!, has_edge, has_node, has_pathG
 export get_node_attributes, get_edge_attributes, get_path
-export nodes_to_index, index_to_nodes, average_degree
+export nodes_to_index, index_to_nodes, average_degree, rename_graph_attribute!
 export rename_node_attribute!, rename_edge_attribute!, add_node_dataset!, add_edge_dataset!
+export add_graph_data!, get_graph_data, get_graph_attributes
 
 abstract type AbstractDataGraph{T} <: Graphs.AbstractGraph{T} end
 
@@ -57,6 +58,25 @@ mutable struct EdgeData{T, T2, M2}
 end
 
 """
+    GraphData{T, T2, M2}
+
+Object for building and storing data corresponding to a graph. Data is stored
+in a vector, but entries of the vector have attribute names stored in this struct
+
+GraphData have the following attributes:
+ `attributes`: vector of strings with length equal to the length of `data`. Each
+ entry is the name of the attribute of that column of data
+ `attribute_map`: dictionary with keys matching the entries of `attributes`. Maps the key
+ to the corresponding vector index
+ `data`: Vector with length equal to the number of attributes
+"""
+mutable struct GraphData{T, T3}
+    attributes::Vector{String}
+    attribute_map::Dict{String, T}
+    data::Vector{T3}
+end
+
+"""
     NodeData(attributes = Vector{String}(),
         attribute_map = Dict{String, Int}(),
         data = Array{Float64}(undef, (0, 0))
@@ -87,7 +107,7 @@ Constructor for building EdgeData{T, T2, M2}
 function EdgeData(
     attributes::Vector{String} = Vector{String}(),
     attribute_map::Dict{String, T} = Dict{String, Int}(),
-    data::M2 = NamedArray{Float64}(undef, (0, 0))
+    data::M2 = Array{Float64}(undef, (0, 0))
 ) where {T <: Real, T2, M2 <: AbstractMatrix{T2}}
     EdgeData{T, T2, M2}(
         attributes,
@@ -97,7 +117,27 @@ function EdgeData(
 end
 
 """
-    DataGraph{T, T1, T2, M1, M2}
+    GraphData(attributes = Vector{String}(),
+        attribute_map = Dict{String, Int}(),
+        data = Vector{Float64}(undef, 0)
+    )
+
+Constructor for building GraphData{T, T3}
+"""
+function GraphData(
+    attributes::Vector{String} = Vector{String}(),
+    attribute_map::Dict{String, T} = Dict{String, Int}(),
+    data::Vector{T3} = Vector{Float64}()
+) where {T <: Real, T3}
+    GraphData{T, T3}(
+        attributes,
+        attribute_map,
+        data
+    )
+end
+
+"""
+    DataGraph{T, T1, T2, T3, M1, M2}
 
 Object for building and storing undirected graphs that contain numerical data on nodes and/or edges.
 
@@ -109,9 +149,9 @@ DataGraphs have the following attributes:
  `edge_map`: dictionary pointing tuple (node_name1, node_name2) to (node_number1, node_number2)
  `node_data`: NodeData object with attributes and data
  `edge_data`: EdgeData object with attributes and data
- `node_positions`: x-y coordinates for node positions; defaults to an empty Vector
+ `graph_data`: GraphData object with attributes and data
 """
-mutable struct DataGraph{T, T1, T2, M1, M2} <: AbstractDataGraph{T}
+mutable struct DataGraph{T, T1, T2, T3, M1, M2} <: AbstractDataGraph{T}
     g::Graphs.SimpleGraph{T}
 
     nodes::Vector{Any}
@@ -121,10 +161,11 @@ mutable struct DataGraph{T, T1, T2, M1, M2} <: AbstractDataGraph{T}
 
     node_data::NodeData{T, T1, M1}
     edge_data::EdgeData{T, T2, M2}
+    graph_data::GraphData{T, T3}
 end
 
 """
-    DataDiGraph{T, T1, T2, M1, M2}
+    DataDiGraph{T, T1, T2, T3, M1, M2}
 
 Object for building and storing directed graphs that contain numerical data on nodes and/or edges.
 
@@ -136,9 +177,9 @@ DataDiGraphs have the following attributes:
  `edge_map`: dictionary pointing tuple (node_name1, node_name2) to (node_number1, node_number2)
  `node_data`: NodeData object with attributes and data
  `edge_data`: EdgeData object with attributes and data
- `node_positions`: x-y coordinates for node positions; defaults to an empty Vector
-"""
-mutable struct DataDiGraph{T, T1, T2, M1, M2} <: AbstractDataGraph{T}
+ `graph_data`: GraphData object with attributes and data
+ """
+mutable struct DataDiGraph{T, T1, T2, T3, M1, M2} <: AbstractDataGraph{T}
     g::Graphs.SimpleDiGraph{T}
 
     nodes::Vector{Any}
@@ -148,6 +189,7 @@ mutable struct DataDiGraph{T, T1, T2, M1, M2} <: AbstractDataGraph{T}
 
     node_data::NodeData{T, T1, M1}
     edge_data::EdgeData{T, T2, M2}
+    graph_data::GraphData{T, T3}
 end
 
 """
@@ -158,8 +200,10 @@ both data types
 """
 DataGraphUnion = Union{DataGraph{T}, DataDiGraph{T}} where T
 
-function Base.eltype(datagraph::D) where {D <: DataGraphUnion}
-    return eltype(eltype(datagraph.g.fadjlist))
+function Base.eltype(
+    dg::D
+) where {D <: DataGraphUnion}
+    return eltype(eltype(dg.g.fadjlist))
 end
 
 include("datagraphs/core.jl")

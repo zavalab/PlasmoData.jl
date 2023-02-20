@@ -58,6 +58,7 @@ dg = symmetric_matrix_to_graph(sym_matrix[1:5, 1:5]; attribute = "weight_value")
     @test edge_data[5:7] == sym_matrix[3:5, 2]
     @test edge_data[8:9] == sym_matrix[4:5, 3]
     @test edge_data[10]  == sym_matrix[5, 4]
+    @test_throws ErrorException symmetric_matrix_to_graph(random_matrix)
 end
 
 dg = tensor_to_graph(random_array, "weight_value")
@@ -70,6 +71,7 @@ dg = tensor_to_graph(random_array, "weight_value")
     @test test_map(dg.nodes, dg.node_map)
     @test test_map(dg.edges, dg.edge_map)
     @test get_node_data(dg)[:] == random_array[:]
+    @test_throws ErrorException tensor_to_graph(random_matrix)
 end
 
 matrix = [1 2 2; 1 1 3; 1 1 1]
@@ -101,6 +103,7 @@ remove_node!(dg, (1, 3))
     @test length(get_node_data(dg)) == length(dg.nodes)
     @test dg.nodes[7] == (3, 3)
     @test get_node_data(dg)[7] == 1
+    @test_throws ErrorException remove_node!(dg, (11, 15))
 end
 
 sym_matrix = matrix + matrix'
