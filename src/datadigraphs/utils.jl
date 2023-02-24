@@ -1,13 +1,13 @@
 """
-    filter_nodes(datadigraph, filter_value; attribute_name)
+    filter_nodes(datadigraph, filter_value, attribute)
 
-Removes the nodes of the graph whose weight value of `attribute_name` is greater than the given
-`filter_value`. If `attribute_name` is not specified, this defaults to the first attribute within
+Removes the nodes of the graph whose weight value of `attribute` is greater than the given
+`filter_value`. If `attribute` is not specified, this defaults to the first attribute within
 the DataGraph's `NodeData`.
 """
 function filter_nodes(
     dg::DataDiGraph,
-    filter_val::R;
+    filter_val::R,
     attribute::String=dg.node_data.attributes[1]
 ) where {R <: Real}
 
@@ -49,8 +49,8 @@ function filter_nodes(
     new_edges      = Vector{Tuple{T, T}}()
     new_edge_map   = Dict{Tuple{T, T}, T}()
     old_edge_index = Vector{Int}()
-    fadjlist       = Vector{Vector{T}}([Vector{T}() for i in 1:length(new_nodes)])  ### TODO: if new_nodes is length 0, this is a vector of type any
-    badjlist       = Vector{Vector{T}}([Vector{T}() for i in 1:length(new_nodes)])  ### TODO: if new_nodes is length 0, this is a vector of type any
+    fadjlist       = [Vector{T}() for i in 1:length(new_nodes)] ## TODO: if length(new_nodes) = 0, this is a vector of type any
+    badjlist       = [Vector{T}() for i in 1:length(new_nodes)] ## TODO: if length(new_nodes) = 0, this is a vector of type any
 
     for i in 1:length(new_nodes)
         new_node_map[new_nodes[i]] = i
@@ -101,15 +101,15 @@ function filter_nodes(
 end
 
 """
-    filter_edges(datadigraph, filter_value; attribute_name)
+    filter_edges(datadigraph, filter_value, attribute)
 
-Removes the edges of the graph whose weight value of `attribute_name` is greater than the given
-`filter_value`. If `attribute_name` is not specified, this defaults to the first attribute within
+Removes the edges of the graph whose weight value of `attribute` is greater than the given
+`filter_value`. If `attribute` is not specified, this defaults to the first attribute within
 the DataGraph's `EdgeData`.
 """
 function filter_edges(
     dg::DataDiGraph,
-    filter_val::R;
+    filter_val::R,
     attribute::String = dg.edge_data.attributes[1]
 ) where {R <: Real}
 
@@ -141,8 +141,8 @@ function filter_edges(
 
     new_edge_map = Dict{Tuple{T, T}, T}()
 
-    fadjlist = Vector{Vector{T}}([Vector{T}() for i in 1:length(nodes)])   ### TODO: if new_nodes is length 0, this is a vector of type any
-    badjlist = Vector{Vector{T}}([Vector{T}() for i in 1:length(nodes)])   ### TODO: if new_nodes is length 0, this is a vector of type any
+    fadjlist = [Vector{T}() for i in 1:length(nodes)] ## TODO: if length(new_nodes) = 0, this is a vector of type any
+    badjlist = [Vector{T}() for i in 1:length(nodes)] ## TODO: if length(new_nodes) = 0, this is a vector of type any
 
     for i in 1:length(new_edges)
         new_edge_map[new_edges[i]] = i
@@ -422,8 +422,8 @@ function aggregate(
     edge_attribute_map = dg.edge_data.attribute_map
     edge_map           = dg.edge_map
 
-    fadjlist = Vector{Vector{T}}([Vector{T}() for i in 1:length(new_nodes)])   ### TODO: if new_nodes is length 0, this is a vector of type any
-    badjlist = Vector{Vector{T}}([Vector{T}() for i in 1:length(new_nodes)])   ### TODO: if new_nodes is length 0, this is a vector of type any
+    fadjlist = [Vector{T}() for i in 1:length(new_nodes)] ## TODO: if length(new_nodes) = 0, this is a vector of type any
+    badjlist = [Vector{T}() for i in 1:length(new_nodes)] ## TODO: if length(new_nodes) = 0, this is a vector of type any
 
 
     node_name_mapping   = Dict{T, Any}()

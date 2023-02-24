@@ -49,6 +49,7 @@ add_node_data!(dg, nodes[3], node_data[3], "weight")
 @testset "add_node_data! test" begin
     @test dg.node_data.data[:, 1] == node_data
     @test dg.node_data.attributes == ["weight"]
+    @test_throws ErrorException add_node_data!(dg, "node5", 5.0, "weight")
 end
 
 # Test add_node_attribute!
@@ -95,6 +96,10 @@ add_node_dataset!(dg4, node_data_dict, "weight4")
     @test get_node_data(dg2)[:, 1][:] == [0.0, 0.0, 4.0, 2.4]
     @test get_node_data(dg3)[:, 1][:] == node_data3
     @test get_node_data(dg4)[:, 1][:] == [3, 4.2, 1.0, 14.5]
+    @test get_node_data(dg, ["weight", "weight4"]) == [6.3 3.0; 7.2 4.2; 8.6 1.0; 4.3 14.5]
+    @test get_node_data(dg, "weight") == [6.3, 7.2, 8.6, 4.3]
+    @test_throws ErrorException get_node_data(dg, ["weight3", "weight5"])
+    @test_throws ErrorException get_node_data(dg, "weight5")
 end
 
 # Test add_edge! function 1
@@ -211,7 +216,26 @@ add_edge_dataset!(dg4, edge_data_dict, "weight4")
     @test get_edge_data(dg2)[:, 1][:] == [0.0, 2.3, 4.4]
     @test get_edge_data(dg3)[:, 1][:] == edge_data3
     @test get_edge_data(dg4)[:, 1][:] == [0.2, 0.5, 0.33]
+    @test get_edge_data(dg, ["weight", "weight3"]) == [2.1 14.0; 3.5 15.3; 6.8 16.4]
+    @test get_edge_data(dg, "weight3") == edge_data3
+    @test_throws ErrorException get_edge_data(dg, ["weight3", "weight5"])
+    @test_throws ErrorException get_edge_data(dg, "weight5")
 end
+
+# Test edge ordering
+
+@testset "test edge ordering" begin
+    @test get_ordered_edge_data(dg) == [6.8 4.4 16.4 0.33; 2.1 1.0 14.0 0.2; 3.5 2.3 15.3 0.5]
+    @test get_ordered_edge_data(dg, ["weight3", "weight2"]) == [16.4 4.4; 14.0 1.0; 15.3 2.3]
+    @test get_ordered_edge_data(dg, "weight4") == [0.33, 0.2, 0.5]
+    order_edges!(dg)
+    @test dg.edges == [(1, 3), (1, 4), (2, 3)]
+    @test test_map(dg.edges, dg.edge_map)
+    @test get_edge_data(dg)  == [6.8 4.4 16.4 0.33; 2.1 1.0 14.0 0.2; 3.5 2.3 15.3 0.5]
+    @test get_edge_data(dg, ["weight3", "weight2"]) == [16.4 4.4; 14.0 1.0; 15.3 2.3]
+    @test get_edge_data(dg, "weight4") == [0.33, 0.2, 0.5]
+end
+
 
 # Test graph_data
 

@@ -367,15 +367,15 @@ function tensor_to_graph(
 end
 
 """
-    filter_nodes(datagraph, filter_value; attribute_name)
+    filter_nodes(datagraph, filter_value, attribute)
 
-Removes the nodes of the graph whose weight value of `attribute_name` is greater than the given
-`filter_value`. If `attribute_name` is not specified, this defaults to the first attribute within
+Removes the nodes of the graph whose weight value of `attribute` is greater than the given
+`filter_value`. If `attribute` is not specified, this defaults to the first attribute within
 the DataGraph's `NodeData`.
 """
 function filter_nodes(
     dg::DataGraph,
-    filter_val::R;
+    filter_val::R,
     attribute::String=dg.node_data.attributes[1]
 ) where {R <: Real}
 
@@ -416,7 +416,7 @@ function filter_nodes(
     new_edges      = Vector{Tuple{T, T}}()
     new_edge_map   = Dict{Tuple{T, T}, T}()
     old_edge_index = Vector{Int}()
-    fadjlist       = [Vector{T}() for i in 1:length(new_nodes)]  ### TODO: if new_nodes is length 0, this is a vector of type any
+    fadjlist       = [Vector{T}() for i in 1:length(new_nodes)] ## TODO: if length(new_nodes) = 0, this is a vector of type any
 
     for i in 1:length(new_nodes)
         new_node_map[new_nodes[i]] = i
@@ -467,15 +467,15 @@ function filter_nodes(
 end
 
 """
-    filter_edges(datagraph, filter_value; attribute_name)
+    filter_edges(datagraph, filter_value, attribute)
 
-Removes the edges of the graph whose weight value of `attribute_name` is greater than the given
-`filter_value`. If `attribute_name` is not specified, this defaults to the first attribute within
+Removes the edges of the graph whose weight value of `attribute` is greater than the given
+`filter_value`. If `attribute` is not specified, this defaults to the first attribute within
 the DataGraph's `EdgeData`.
 """
 function filter_edges(
     dg::DataGraph,
-    filter_val::R;
+    filter_val::R,
     attribute::String = dg.edge_data.attributes[1]
 ) where {R <: Real}
 
@@ -508,7 +508,7 @@ function filter_edges(
 
     new_edge_map = Dict{Tuple{T, T}, T}()
 
-    fadjlist = [Vector{T}() for i in 1:length(nodes)]
+    fadjlist = [Vector{T}() for i in 1:length(nodes)]  ## TODO: if length(new_nodes) = 0, this is a vector of type any
 
     for i in 1:length(new_edges)
         new_edge_map[new_edges[i]] = i
@@ -545,16 +545,16 @@ function filter_edges(
 end
 
 """
-    run_EC_on_nodes(datagraph, threshold_range; attribute_name, scale = false)
+    run_EC_on_nodes(datagraph, threshold_range, attribute, scale = false)
 
 Returns the Euler Characteristic Curve by filtering the nodes of the graph at each value in `threshold_range`
-and computing the Euler Characteristic after each filtration. If `attribute_name` is not defined, it defaults
+and computing the Euler Characteristic after each filtration. If `attribute` is not defined, it defaults
 to the first attribute in the DataGraph's `NodeData`. `scale` is a Boolean that indicates whether to scale
 the Euler Characteristic by the total number of objects (nodes + edges) in the original graph
 """
 function run_EC_on_nodes(
     dg::DataGraph,
-    thresh;
+    thresh,
     attribute::String = dg.node_data.attributes[1],
     scale::Bool = false
 )
@@ -592,16 +592,16 @@ function run_EC_on_nodes(
 end
 
 """
-    run_EC_on_edges(datagraph, threshold_range; attribute_name, scale = false)
+    run_EC_on_edges(datagraph, threshold_range, attribute, scale = false)
 
 Returns the Euler Characteristic Curve by filtering the edges of the graph at each value in `threshold_range`
-and computing the Euler Characteristic after each filtration. If `attribute_name` is not defined, it defaults
+and computing the Euler Characteristic after each filtration. If `attribute` is not defined, it defaults
 to the first attribute in the DataGraph's `EdgeData`. `scale` is a Boolean that indicates whether to scale
 the Euler Characteristic by the total number of objects (nodes + edges) in the original graph
 """
 function run_EC_on_edges(
     dg::DataGraph,
-    thresh;
+    thresh,
     attribute::String = dg.edge_data.attributes[1],
     scale::Bool = false
 )

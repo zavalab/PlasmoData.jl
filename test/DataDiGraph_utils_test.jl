@@ -41,7 +41,7 @@ agg_graph = aggregate(dg, [1, 5], "new_node")
     @test length(dg.edges) - 1 == length(agg_graph.edges)
     @test test_map(agg_graph.nodes, agg_graph.node_map)
     @test test_map(agg_graph.edges, agg_graph.edge_map)
-    @test get_node_data(agg_graph, "new_node") == 1.5
+    @test get_node_data(agg_graph, "new_node", "weight") == 1.5
     @test agg_graph.g.ne == length(agg_graph.edges)
     @test (5, 2) in agg_graph.edges
     @test (5, 3) in agg_graph.edges

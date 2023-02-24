@@ -9,7 +9,7 @@ function DataGraph(
     nodes::Vector{Any},
     edges::Vector{Tuple{T, T}};
     ne::T = length(edges),
-    fadjlist::Vector{Vector{T}} = [Vector{Int} for i in 1:length(nodes)],
+    fadjlist::Vector{Vector{T}} = Vector{Vector{T}}[Vector{Int} for i in 1:length(nodes)],
     node_attributes::Vector{String} = String[],
     edge_attributes::Vector{String} = String[],
     graph_attributes::Vector{String} = String[],
@@ -285,16 +285,15 @@ that attribute name default to a value of zero.
 """
 function add_node_data!(
     dg::D,
-    node::T1,
-    node_weight::T2,
-    attribute::String = "weight"
-) where {D <: DataGraphUnion, T1 <: Any, T2 <: Any}
+    node::N1,
+    node_weight::N2,
+    attribute::String = "weight";
+    default_weight::N3 = 0
+) where {D <: DataGraphUnion, N1 <: Any, N2 <: Any, N3 <: Any}
 
     nodes         = dg.nodes
     attributes    = dg.node_data.attributes
     node_map      = dg.node_map
-    node_data     = dg.node_data.data
-    attribute_map = dg.node_data.attribute_map
 
     if !(node in nodes)
         error("$node does not exist in graph")
@@ -306,19 +305,14 @@ function add_node_data!(
     end
 
     if !(attribute in attributes)
-        # Add new column to node_weight array
-        T = eltype(node_data)
-        push!(attributes, attribute)
-        attribute_map[attribute] = length(attributes)
-        new_col = fill(T(0), (length(nodes), 1))
-        node_data = hcat(node_data, new_col)
-        node_data[node_map[node], attribute_map[attribute]] = node_weight
-        dg.node_data.data = node_data
-        return true
-    else
-        node_data[node_map[node], attribute_map[attribute]] = node_weight
-        return true
+        _add_data_column!(dg.node_data, attribute, default_weight)
     end
+
+    node_data = dg.node_data.data
+    attribute_map = dg.node_data.attribute_map
+
+    node_data[node_map[node], attribute_map[attribute]] = node_weight
+    return true
 end
 
 """
@@ -333,14 +327,13 @@ function add_node_dataset!(
     dg::D,
     node_list::Vector,
     weight_list::Vector,
-    attribute::String
-) where {D <: DataGraphUnion}
+    attribute::String;
+    default_weight::N = 0
+) where {D <: DataGraphUnion, N <: Any}
 
     nodes         = dg.nodes
     attributes    = dg.node_data.attributes
     node_map      = dg.node_map
-    node_data     = dg.node_data.data
-    attribute_map = dg.node_data.attribute_map
 
     if !(all(x -> x in nodes, node_list))
         error("node_list contains nodes not in datagraph")
@@ -356,25 +349,16 @@ function add_node_dataset!(
     end
 
     if !(attribute in attributes)
-        # Add new column to node_weight array
-        T = eltype(node_data)
-        push!(attributes, attribute)
-        attribute_map[attribute] = length(attributes)
-
-        new_col = fill(T(0), (length(nodes), 1))
-        node_data = hcat(node_data, new_col)
-        for i in 1:length(node_list)
-            node_data[node_map[node_list[i]], attribute_map[attribute]] = weight_list[i]
-        end
-        dg.node_data.data = node_data
-        return true
-    else
-        for i in 1:length(node_list)
-            node_data[node_map[node_list[i]], attribute_map[attribute]] = weight_list[i]
-        end
-        dg.node_data.data = node_data
-        return true
+        _add_data_column!(dg.node_data, attribute, default_weight)
     end
+
+    node_data = dg.node_data.data
+    attribute_map = dg.node_data.attribute_map
+
+    for i in 1:length(node_list)
+        node_data[node_map[node_list[i]], attribute_map[attribute]] = weight_list[i]
+    end
+    return true
 end
 
 """
@@ -387,14 +371,12 @@ added as node data in the order that nodes are listed in `dg.nodes`.
 function add_node_dataset!(
     dg::D,
     weight_list::Vector,
-    attribute::String
-) where {D <: DataGraphUnion}
+    attribute::String;
+    default_weight::N = 0
+) where {D <: DataGraphUnion, N <: Any}
 
     nodes         = dg.nodes
     attributes    = dg.node_data.attributes
-    node_data     = dg.node_data.data
-    attribute_map = dg.node_data.attribute_map
-
 
     if length(weight_list) != length(nodes)
         error("weight list length not equal to the number of nodes")
@@ -406,25 +388,16 @@ function add_node_dataset!(
     end
 
     if !(attribute in attributes)
-        # Add new column to node_weight array
-        T = eltype(node_data)
-        push!(attributes, attribute)
-        attribute_map[attribute] = length(attributes)
-
-        new_col = fill(T(0), (length(nodes), 1))
-        node_data = hcat(node_data, new_col)
-        for i in 1:length(weight_list)
-            node_data[i, attribute_map[attribute]] = weight_list[i]
-        end
-        dg.node_data.data = node_data
-        return true
-    else
-        for i in 1:length(weight_list)
-            node_data[i, attribute_map[attribute]] = weight_list[i]
-        end
-        dg.node_data.data = node_data
-        return true
+        _add_data_column!(dg.node_data, attribute, default_weight)
     end
+
+    node_data = dg.node_data.data
+    attribute_map = dg.node_data.attribute_map
+
+    for i in 1:length(weight_list)
+        node_data[i, attribute_map[attribute]] = weight_list[i]
+    end
+    return true
 end
 
 """
@@ -436,14 +409,13 @@ must contain keys that correspond to the node names in `dg.nodes`.
 function add_node_dataset!(
     dg::D,
     weight_dict::Dict,
-    attribute::String
-) where {D <: DataGraphUnion}
+    attribute::String;
+    default_weight::N = 0
+) where {D <: DataGraphUnion, N <: Any}
 
     nodes         = dg.nodes
     node_map      = dg.node_map
     attributes    = dg.node_data.attributes
-    node_data     = dg.node_data.data
-    attribute_map = dg.node_data.attribute_map
 
     node_keys = keys(weight_dict)
 
@@ -457,25 +429,16 @@ function add_node_dataset!(
     end
 
     if !(attribute in attributes)
-        # Add new column to node_weight array
-        T = eltype(node_data)
-        push!(attributes, attribute)
-        attribute_map[attribute] = length(attributes)
-
-        new_col = fill(T(0), (length(nodes), 1))
-        node_data = hcat(node_data, new_col)
-        for i in node_keys
-            node_data[node_map[i], attribute_map[attribute]] = weight_dict[i]
-        end
-        dg.node_data.data = node_data
-        return true
-    else
-        for i in node_keys
-            node_data[node_map[i], attribute_map[attribute]] = weight_dict[i]
-        end
-        dg.node_data.data = node_data
-        return true
+        _add_data_column!(dg.node_data, attribute, default_weight)
     end
+
+    node_data = dg.node_data.data
+    attribute_map = dg.node_data.attribute_map
+
+    for i in node_keys
+        node_data[node_map[i], attribute_map[attribute]] = weight_dict[i]
+    end
+    return true
 end
 
 """
@@ -489,17 +452,17 @@ value defined for that attribute name default to a value of zero.
 """
 function add_edge_data!(
     dg::DataGraph,
-    node1::T1,
-    node2::T2,
-    edge_weight::T3,
-    attribute::String
-) where {T1 <: Any, T2 <: Any, T3 <: Any}
+    node1::N1,
+    node2::N2,
+    edge_weight::N3,
+    attribute::String;
+    default_weight::N4 = 0
+) where {N1 <: Any, N2 <: Any, N3 <: Any, N4 <: Any}
 
     edges         = dg.edges
     attributes    = dg.edge_data.attributes
     edge_map      = dg.edge_map
     node_map      = dg.node_map
-    attribute_map = dg.edge_data.attribute_map
 
     node1_index = node_map[node1]
     node2_index = node_map[node2]
@@ -516,31 +479,26 @@ function add_edge_data!(
     end
 
     if !(attribute in attributes)
-        edge_data = dg.edge_data.data
-        T = eltype(edge_data)
-        # Add new column to node_weight array
-        push!(attributes, attribute)
-        attribute_map[attribute] = length(attributes)
-        new_col = fill(T(0), (length(edges), 1))
-        edge_data = hcat(edge_data, new_col)
-        edge_data[edge_map[edge], attribute_map[attribute]] = edge_weight
-        dg.edge_data.data = edge_data
-        return true
-    else
-        edge_data = dg.edge_data.data
-        edge_data[edge_map[edge], attribute_map[attribute]] = edge_weight
-        return true
+        _add_data_column!(dg.edge_data, attribute, default_weight)
     end
+
+    edge_data = dg.edge_data.data
+    attribute_map = dg.edge_data.attribute_map
+
+    edge_data[edge_map[edge], attribute_map[attribute]] = edge_weight
+    return true
 end
 
 function add_edge_data!(
     dg::DataGraph,
     edge::Tuple,
-    edge_weight::T,
-    attribute::String
-) where {T <: Any}
+    edge_weight::N1,
+    attribute::String;
+    default_weight::N2 = 0
+) where {N1 <: Any, N2 <: Any}
     add_edge_data!(dg, edge[1], edge[2], edge_weight, attribute)
 end
+
 """
     add_edge_dataset!(dg::D, edge_list, weight_list, attribute) where {D <: DataGraphUnion}
 
@@ -553,15 +511,14 @@ function add_edge_dataset!(
     dg::DataGraph,
     edge_list::Vector,
     weight_list::Vector,
-    attribute::String
-)
+    attribute::String;
+    default_weight::N = 0
+) where {N <: Any}
 
     edges         = dg.edges
     attributes    = dg.edge_data.attributes
     edge_map      = dg.edge_map
     node_map      = dg.node_map
-    attribute_map = dg.edge_data.attribute_map
-    edge_data     = dg.edge_data.data
 
     if length(edge_list) != length(weight_list)
         error("edge list and weight list have different lengths")
@@ -577,27 +534,17 @@ function add_edge_dataset!(
     end
 
     if !(attribute in attributes)
-        edge_data = dg.edge_data.data
-        T = eltype(edge_data)
-        # Add new column to node_weight array
-        push!(attributes, attribute)
-        attribute_map[attribute] = length(attributes)
-        new_col = fill(T(0), (length(edges), 1))
-        edge_data = hcat(edge_data, new_col)
-
-        for i in 1:length(edge_list)
-            edge = _get_edge(node_map, edge_list[i])
-            edge_data[edge_map[edge], attribute_map[attribute]] = weight_list[i]
-        end
-        dg.edge_data.data = edge_data
-        return true
-    else
-        for i in 1:length(edge_list)
-            edge = _get_edge(node_map, edge_list[i])
-            edge_data[edge_map[edge], attribute_map[attribute]] = weight_list[i]
-        end
-        return true
+        _add_data_column!(dg.edge_data, attribute, default_weight)
     end
+
+    edge_data = dg.edge_data.data
+    attribute_map = dg.edge_data.attribute_map
+
+    for i in 1:length(edge_list)
+        edge = _get_edge(node_map, edge_list[i])
+        edge_data[edge_map[edge], attribute_map[attribute]] = weight_list[i]
+    end
+    return true
 end
 
 """
@@ -610,15 +557,14 @@ added as edge data in the order that edges are listed in `dg.edges`.
 function add_edge_dataset!(
     dg::DataGraph,
     weight_list::Vector,
-    attribute::String
+    attribute::String;
+    default_weight::N = 0
+) where {N <: Any}
 
-    )
     edges         = dg.edges
     attributes    = dg.edge_data.attributes
     edge_map      = dg.edge_map
     node_map      = dg.node_map
-    attribute_map = dg.edge_data.attribute_map
-    edge_data     = get_edge_data(dg)
 
     if length(edges) != length(weight_list)
         error("weight list is not the same length as number of edges")
@@ -630,25 +576,16 @@ function add_edge_dataset!(
     end
 
     if !(attribute in attributes)
-        edge_data = dg.edge_data.data
-        T = eltype(edge_data)
-        # Add new column to node_weight array
-        push!(attributes, attribute)
-        attribute_map[attribute] = length(attributes)
-        new_col = fill(T(0), (length(edges), 1))
-        edge_data = hcat(edge_data, new_col)
-
-        for i in 1:length(edges)
-            edge_data[i, attribute_map[attribute]] = weight_list[i]
-        end
-        dg.edge_data.data = edge_data
-        return true
-    else
-        for i in 1:length(edges)
-            edge_data[i, attribute_map[attribute]] = weight_list[i]
-        end
-        return true
+        _add_data_column!(dg.edge_data, attribute, default_weight)
     end
+
+    edge_data = dg.edge_data.data
+    attribute_map = dg.edge_data.attribute_map
+
+    for i in 1:length(edges)
+        edge_data[i, attribute_map[attribute]] = weight_list[i]
+    end
+    return true
 end
 
 """
@@ -660,15 +597,14 @@ must contain keys that correspond to the edges (as node names, not integers) in 
 function add_edge_dataset!(
     dg::DataGraph,
     weight_dict::Dict,
-    attribute::String
-)
+    attribute::String;
+    default_weight::N = 0
+) where {N <: Any}
 
     edges         = dg.edges
     attributes    = dg.edge_data.attributes
     edge_map      = dg.edge_map
     node_map      = dg.node_map
-    attribute_map = dg.edge_data.attribute_map
-    edge_data     = get_edge_data(dg)
 
     edge_keys = keys(weight_dict)
 
@@ -682,26 +618,15 @@ function add_edge_dataset!(
     end
 
     if !(attribute in attributes)
-        edge_data = dg.edge_data.data
-        T = eltype(edge_data)
-        # Add new column to node_weight array
-        push!(attributes, attribute)
-        attribute_map[attribute] = length(attributes)
-        new_col = fill(T(0), (length(edges), 1))
-        edge_data = hcat(edge_data, new_col)
-
-        for i in edge_keys
-            edge_index = edge_map[_get_edge(node_map, (i[1], i[2]))]
-            edge_data[edge_index, attribute_map[attribute]] = weight_dict[i]
-        end
-
-        dg.edge_data.data = edge_data
-        return true
-    else
-        for i in edge_keys
-            edge_index = edge_map[_get_edge(node_map, (i[1], i[2]))]
-            edge_data[edge_index, attribute_map[attribute]] = weight_dict[i]
-        end
-        return true
+        _add_data_column!(dg.edge_data, attribute, default_weight)
     end
+
+    edge_data = dg.edge_data.data
+    attribute_map = dg.edge_data.attribute_map
+
+    for i in edge_keys
+        edge_index = edge_map[_get_edge(node_map, (i[1], i[2]))]
+        edge_data[edge_index, attribute_map[attribute]] = weight_dict[i]
+    end
+    return true
 end

@@ -470,3 +470,140 @@ function index_to_nodes(
 
     return node_list
 end
+
+"""
+    order_edges!(dg) where {D <: DataGraphUnion}
+
+Arranges in place the edges of `dg` so that they follow the order of `dg.nodes`. For `DataGraph`s, this
+means all edges connected to `dg.nodes[1]` are ordered first, and so on. For `DataDiGraph`s, this
+means that all edges originating at `dg.nodes[1]` are ordered first, and so on for `length(dg.nodes)`
+"""
+function order_edges!(
+    dg::D
+) where {D <: DataGraphUnion}
+
+    edges = dg.edges
+    edge_map = dg.edge_map
+    edge_order = _get_edge_order(dg)
+
+    new_edges = edges[edge_order]
+
+    for (i, edge) in enumerate(new_edges)
+        edge_map[edge] = i
+    end
+
+    if length(dg.edge_data.attributes) > 0
+        edge_data = get_edge_data(dg)
+        dg.edge_data.data = edge_data[edge_order, :]
+    end
+
+    dg.edges = new_edges
+end
+
+"""
+    get_ordered_edge_data(dg::D) where {D <: DataGraphUnion}
+
+Returns the ordered edge data matrix. For `DataGraph`s, this means all edges connected to
+`dg.nodes[1]` are ordered first, and so on. For `DataDiGraph`s, this means that all edges
+originating at `dg.nodes[1]` are ordered first, and so on for `length(dg.nodes)`
+"""
+function get_ordered_edge_data(
+    dg::D
+) where {D <: DataGraphUnion}
+
+    edge_order = _get_edge_order(dg)
+
+    return get_edge_data(dg)[edge_order, :]
+end
+
+"""
+    get_ordered_edge_data(dg::D, attribute_list) where {D <: DataGraphUnion}
+
+Returns the ordered edge data matrix for the attributes in `attribute_list`.
+For `DataGraph`s, this means all edges connected to `dg.nodes[1]` are ordered first,
+and so on. For `DataDiGraph`s, this means that all edges originating at `dg.nodes[1]`
+ are ordered first, and so on for `length(dg.nodes)`
+"""
+function get_ordered_edge_data(
+    dg::D,
+    attribute_list::Vector{String}
+) where {D <: DataGraphUnion}
+
+    edge_order = _get_edge_order(dg)
+
+    return get_edge_data(dg, attribute_list)[edge_order, :]
+end
+
+"""
+    get_ordered_edge_data(dg::D, attribute::String) where {D <: DataGraphUnion}
+
+Returns the ordered edge data vector for `attribute`.
+For `DataGraph`s, this means all edges connected to `dg.nodes[1]` are ordered first,
+and so on. For `DataDiGraph`s, this means that all edges originating at `dg.nodes[1]`
+ are ordered first, and so on for `length(dg.nodes)`
+"""
+function get_ordered_edge_data(
+    dg::D,
+    attribute::String
+) where {D <: DataGraphUnion}
+
+    edge_order = _get_edge_order(dg)
+
+    return get_edge_data(dg, attribute)[edge_order]
+end
+
+function _add_data_column!(Data, attribute, default_weight)
+    M = typeof(Data.data)
+    dim1 = size(Data.data, 1)
+    push!(Data.attributes, attribute)
+    Data.attribute_map[attribute] = length(Data.attributes)
+    new_col = M(fill(default_weight, dim1, 1))
+
+    Data.data = hcat(Data.data, new_col)
+end
+
+function _get_edge_order(
+    dg::DataGraph
+)
+
+    T = eltype(dg)
+
+    edge_order = [T(1) for i in 1:length(dg.edges)]
+    edge_map   = dg.edge_map
+
+    current_index = 1
+    for i in 1:length(dg.nodes)
+        fadjlist = dg.g.fadjlist[i]
+        next_index = findfirst(x -> x > i, fadjlist)
+        if next_index != nothing
+            neighbor_list = fadjlist[next_index:length(fadjlist)]
+            for j in neighbor_list
+                edge_order[current_index] = edge_map[(i, j)]
+                current_index += 1
+            end
+        end
+    end
+
+    return edge_order
+end
+
+function _get_edge_order(
+    dg::DataDiGraph
+)
+
+    T = eltype(dg)
+
+    edge_order = [T(1) for i in 1:length(dg.edges)]
+    edge_map   = dg.edge_map
+
+    current_index = 1
+    for i in 1:length(dg.nodes)
+        fadjlist = dg.g.fadjlist[i]
+        for j in fadjlist
+            edge_order[current_index] = edge_map[(i, j)]
+            current_index += 1
+        end
+    end
+
+    return edge_order
+end

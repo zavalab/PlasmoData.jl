@@ -115,7 +115,6 @@ function add_node!(
     end
 end
 
-
 """
     add_edge!(dg, node_1, node_2)
     add_edge!(dg, (node1, node2))
@@ -197,14 +196,14 @@ function add_edge_data!(
     node1::N1,
     node2::N2,
     edge_weight::N3,
-    attribute::String="weight"
-) where {N1 <: Any, N2 <: Any, N3 <: Any}
+    attribute::String="weight";
+    default_weight::N4 = 0
+) where {N1 <: Any, N2 <: Any, N3 <: Any, N4 <: Any}
 
     edges         = dg.edges
     attributes    = dg.edge_data.attributes
     edge_map      = dg.edge_map
     node_map      = dg.node_map
-    attribute_map = dg.edge_data.attribute_map
 
     node1_index = node_map[node1]
     node2_index = node_map[node2]
@@ -221,29 +220,23 @@ function add_edge_data!(
     end
 
     if !(attribute in attributes)
-        edge_data = dg.edge_data.data
-        edge_type = eltype(edge_data)
-        # Add new column to node_weight array
-        push!(attributes, attribute)
-        attribute_map[attribute] = length(attributes)
-        new_col = fill(edge_type(0), (length(edges), 1))
-        edge_data = hcat(edge_data, new_col)
-        edge_data[edge_map[edge], attribute_map[attribute]] = edge_weight
-        dg.edge_data.data = edge_data
-        return true
-    else
-        edge_data = dg.edge_data.data
-        edge_data[edge_map[edge], attribute_map[attribute]] = edge_weight
-        return true
+        _add_data_column!(dg.edge_data, attribute, default_weight)
     end
+
+    edge_data = dg.edge_data.data
+    attribute_map = dg.edge_data.attribute_map
+
+    edge_data[edge_map[edge], attribute_map[attribute]] = edge_weight
+    return true
 end
 
 function add_edge_data!(
     dg::DataDiGraph,
     edge::Tuple,
-    edge_weight::N,
-    attribute::String = "weight"
-) where {N <: Any}
+    edge_weight::N1,
+    attribute::String = "weight";
+    default_weight::N2 = 0
+) where {N1 <: Any, N2 <: Any}
     add_edge_data!(dg, edge[1], edge[2], edge_weight, attribute)
 end
 
@@ -252,15 +245,14 @@ function add_edge_dataset!(
     dg::DataDiGraph,
     edge_list::Vector,
     weight_list::Vector,
-    attribute::String
-)
+    attribute::String;
+    default_weight::N = 0
+) where {N <: Any}
 
     edges         = dg.edges
     attributes    = dg.edge_data.attributes
     edge_map      = dg.edge_map
     node_map      = dg.node_map
-    attribute_map = dg.edge_data.attribute_map
-    edge_data     = get_edge_data(dg)
 
     if length(edge_list) != length(weight_list)
         error("edge list and weight list have different lengths")
@@ -276,34 +268,25 @@ function add_edge_dataset!(
     end
 
     if !(attribute in attributes)
-        edge_data = dg.edge_data.data
-        T = eltype(edge_data)
-        # Add new column to node_weight array
-        push!(attributes, attribute)
-        attribute_map[attribute] = length(attributes)
-        new_col = fill(T(0), (length(edges), 1))
-        edge_data = hcat(edge_data, new_col)
-
-        for i in 1:length(edge_list)
-            edge = (node_map[edge_list[i][1]], node_map[edge_list[i][2]])
-            edge_data[edge_map[edge], attribute_map[attribute]] = weight_list[i]
-        end
-        dg.edge_data.data = edge_data
-        return true
-    else
-        for i in 1:length(edge_list)
-            edge = (node_map[edge_list[i][1]], node_map[edge_list[i][2]])
-            edge_data[edge_map[edge], attribute_map[attribute]] = weight_list[i]
-        end
-        return true
+        _add_data_column!(dg.edge_data, attribute, default_weight)
     end
+
+    edge_data = dg.edge_data.data
+    attribute_map = dg.edge_data.attribute_map
+
+    for i in 1:length(edge_list)
+        edge = (node_map[edge_list[i][1]], node_map[edge_list[i][2]])
+        edge_data[edge_map[edge], attribute_map[attribute]] = weight_list[i]
+    end
+    return true
 end
 
 function add_edge_dataset!(
     dg::DataDiGraph,
     weight_list::Vector,
-    attribute::String
-)
+    attribute::String;
+    default_weight::N = 0
+) where {N <: Any}
 
     edges         = dg.edges
     attributes    = dg.edge_data.attributes
@@ -322,39 +305,29 @@ function add_edge_dataset!(
     end
 
     if !(attribute in attributes)
-        edge_data = dg.edge_data.data
-        T = eltype(edge_data)
-        # Add new column to node_weight array
-        push!(attributes, attribute)
-        attribute_map[attribute] = length(attributes)
-        new_col = fill(T(0), (length(edges), 1))
-        edge_data = hcat(edge_data, new_col)
-
-        for i in 1:length(edges)
-            edge_data[i, attribute_map[attribute]] = weight_list[i]
-        end
-        dg.edge_data.data = edge_data
-        return true
-    else
-        for i in 1:length(edges)
-            edge_data[i, attribute_map[attribute]] = weight_list[i]
-        end
-        return true
+        _add_data_column!(dg.edge_data, attribute, default_weight)
     end
+
+    edge_data = dg.edge_data.data
+    attribute_map = dg.edge_data.attribute_map
+
+    for i in 1:length(edges)
+        edge_data[i, attribute_map[attribute]] = weight_list[i]
+    end
+    return true
 end
 
 function add_edge_dataset!(
     dg::DataDiGraph,
     weight_dict::Dict,
-    attribute::String
-)
+    attribute::String;
+    default_weight::N = 0
+) where {N <: Any}
 
     edges         = dg.edges
     attributes    = dg.edge_data.attributes
     edge_map      = dg.edge_map
     node_map      = dg.node_map
-    attribute_map = dg.edge_data.attribute_map
-    edge_data     = get_edge_data(dg)
 
     edge_keys = keys(weight_dict)
 
@@ -368,26 +341,15 @@ function add_edge_dataset!(
     end
 
     if !(attribute in attributes)
-        edge_data = dg.edge_data.data
-        T = eltype(edge_data)
-        # Add new column to node_weight array
-        push!(attributes, attribute)
-        attribute_map[attribute] = length(attributes)
-        new_col = fill(T(0), (length(edges), 1))
-        edge_data = hcat(edge_data, new_col)
-
-        for i in edge_keys
-            edge_index = edge_map[(node_map[i[1]], node_map[i[2]])]
-            edge_data[edge_index, attribute_map[attribute]] = weight_dict[i]
-        end
-
-        dg.edge_data.data = edge_data
-        return true
-    else
-        for i in edge_keys
-            edge_index = edge_map[(node_map[i[1]], node_map[i[2]])]
-            edge_data[edge_index, attribute_map[attribute]] = weight_dict[i]
-        end
-        return true
+        _add_data_column!(dg.edge_data, attribute, default_weight)
     end
+
+    edge_data = dg.edge_data.data
+    attribute_map = dg.edge_data.attribute_map
+
+    for i in edge_keys
+        edge_index = edge_map[(node_map[i[1]], node_map[i[2]])]
+        edge_data[edge_index, attribute_map[attribute]] = weight_dict[i]
+    end
+    return true
 end

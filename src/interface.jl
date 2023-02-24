@@ -1,4 +1,3 @@
-
 """
     get_node_data(dg::D) where {D <: DataGraphUnion}
 
@@ -30,6 +29,94 @@ function get_graph_data(
     dg::D
 ) where {D <: DataGraphUnion}
     return dg.graph_data.data
+end
+
+"""
+    get_node_data(dg::D, attribute_list) where {D <: DataGraphUnion}
+
+Returns a matrix of the node data for the attributes in attribute list in the order
+that the attributes are defined in the list
+"""
+function get_node_data(
+    dg::D,
+    attribute_list::Vector{String}
+) where {D <: DataGraphUnion}
+    node_data = get_node_data(dg)
+    attributes = dg.node_data.attributes
+    attribute_map = dg.node_data.attribute_map
+
+    if !(all(x -> x in attributes, attribute_list))
+        error("Attribute(s) in attribute_list are not defined in NodeData")
+    end
+
+    attribute_indexes = [attribute_map[i] for i in attribute_list]
+
+    return node_data[:, attribute_indexes]
+end
+
+
+"""
+    get_edge_data(dg::D, attribute_list) where {D <: DataGraphUnion}
+
+Returns a matrix of the edge data for the attributes in attribute list in the order
+that the attributes are defined in the list
+"""
+function get_edge_data(
+    dg::D,
+    attribute_list::Vector{String}
+) where {D <: DataGraphUnion}
+    edge_data = get_edge_data(dg)
+    attributes = dg.edge_data.attributes
+    attribute_map = dg.edge_data.attribute_map
+
+    if !(all(x -> x in attributes, attribute_list))
+        error("Attribute(s) in attribute_list are not defined in EdgeData")
+    end
+
+    attribute_indexes = [attribute_map[i] for i in attribute_list]
+
+    return edge_data[:, attribute_indexes]
+end
+
+"""
+    get_node_data(dg::D, attribute::String) where {D <: DataGraphUnion}
+
+Returns a vector of the edge data for the attribute
+"""
+function get_node_data(
+    dg::D,
+    attribute::String
+) where {D <: DataGraphUnion}
+    node_data = get_node_data(dg)
+    attributes = dg.node_data.attributes
+    attribute_map = dg.node_data.attribute_map
+
+    if !(attribute in attributes)
+        error("$attribute not defined for node data in datagraph")
+    end
+
+    return node_data[:, attribute_map[attribute]][:]
+end
+
+
+"""
+    get_edge_data(dg::D, attribute_list) where {D <: DataGraphUnion}
+
+Returns a vector of the edge data corresponding to the attribute
+"""
+function get_edge_data(
+    dg::D,
+    attribute::String
+) where {D <: DataGraphUnion}
+    edge_data = get_edge_data(dg)
+    attributes = dg.edge_data.attributes
+    attribute_map = dg.edge_data.attribute_map
+
+    if !(attribute in attributes)
+        error("$attribute not defined for edge data in datagraph")
+    end
+
+    return edge_data[:, attribute_map[attribute]][:]
 end
 
 """

@@ -6,7 +6,7 @@ Returns the value of attribute name on the given node
 function get_node_data(
     dg::DataDiGraph,
     node::N,
-    attribute::String=dg.node_data.attributes[1]
+    attribute::String
 ) where {N <: Any}
 
     node_map  = dg.node_map
@@ -27,7 +27,7 @@ function get_edge_data(
     dg::DataDiGraph,
     node1::N1,
     node2::N2,
-    attribute::String=dg.edge_data.attributes[1]
+    attribute::String
 ) where {N1 <: Any, N2 <: Any}
 
     edge_map  = dg.edge_map
@@ -47,7 +47,7 @@ end
 function get_edge_data(
     dg::DataDiGraph,
     edge_tuple::Tuple,
-    attribute::String=dg.edge_data.attributes[1]
+    attribute::String
 )
     return get_edge_data(dg, edge_tuple[1], edge_tuple[2], attribute)
 end
