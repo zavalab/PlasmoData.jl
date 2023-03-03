@@ -17,6 +17,27 @@ function get_EC(
     return EC
 end
 
+function _EC_count_edges(
+    bool_vec,
+    adj_mat
+)
+
+    count = 0
+    for (index, val) in enumerate(bool_vec)
+        if val == 1
+            col_range = adj_mat.colptr[index]:(adj_mat.colptr[index + 1] - 1)
+            row_vals = view(adj_mat.rowval, col_range)
+            for r in row_vals
+                if bool_vec[r] == 1
+                    count += 1
+                end
+            end
+        end
+    end
+
+    return count / 2
+end
+
 """
     _build_matrix_graph!
 
@@ -418,6 +439,10 @@ function filter_nodes(
     old_edge_index = Vector{Int}()
     fadjlist       = [Vector{T}() for i in 1:length(new_nodes)] ## TODO: if length(new_nodes) = 0, this is a vector of type any
 
+    if length(new_nodes) == 0
+        fadjlist = Vector{Vector{T}}[]
+    end
+
     for i in 1:length(new_nodes)
         new_node_map[new_nodes[i]] = i
     end
@@ -580,11 +605,11 @@ function run_EC_on_nodes(
 
     ECs = zeros(length(thresh))
 
+    attribute_index = node_attribute_map[attribute]
     for (j,i) in enumerate(thresh)
-        bool_vec  = node_data[:, node_attribute_map[attribute]] .< i
-        new_am    = am[bool_vec, bool_vec]
+        bool_vec  = view(node_data, :, attribute_index) .< i
+        num_edges = _EC_count_edges(bool_vec, am)
         num_nodes = sum(bool_vec)
-        num_edges = sum(new_am.nzval) / 2
         ECs[j]    = num_nodes - num_edges
     end
 
@@ -620,8 +645,9 @@ function run_EC_on_edges(
 
     num_nodes = length(nodes)
 
+    attribute_index = edge_attribute_map[attribute]
     for (j,i) in enumerate(thresh)
-        bool_vec  = edge_data[:, edge_attribute_map[attribute]].< i
+        bool_vec  = view(edge_data, :, attribute_index) .< i
         num_edges = sum(bool_vec)
         ECs[j]    = num_nodes - num_edges
     end
