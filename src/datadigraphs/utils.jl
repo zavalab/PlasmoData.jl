@@ -1,14 +1,18 @@
 """
-    filter_nodes(datadigraph, filter_value, attribute)
+    filter_nodes(datadigraph, filter_value, attribute = dg.node_data.attributes[1]; fn = isless)
 
 Removes the nodes of the graph whose weight value of `attribute` is greater than the given
 `filter_value`. If `attribute` is not specified, this defaults to the first attribute within
 the DataGraph's `NodeData`.
+
+`fn` is a function that takes an input of two scalar values and is broadcast to the data vector.
+For example, isless, isgreater, isequal
 """
 function filter_nodes(
     dg::DataDiGraph,
     filter_val::R,
-    attribute::String=dg.node_data.attributes[1]
+    attribute::String=dg.node_data.attributes[1];
+    fn::Function = isless
 ) where {R <: Real}
 
     node_attributes    = dg.node_data.attributes
@@ -37,7 +41,7 @@ function filter_nodes(
 
     am = Graphs.LinAlg.adjacency_matrix(dg.g)
 
-    bool_vec = node_data[:, node_attribute_map[attribute]] .< filter_val
+    bool_vec = fn.(node_data[:, node_attribute_map[attribute]], filter_val)
 
     new_am = am[bool_vec, bool_vec]
 
@@ -101,16 +105,20 @@ function filter_nodes(
 end
 
 """
-    filter_edges(datadigraph, filter_value, attribute)
+    filter_edges(datadigraph, filter_value, attribute = dg.edge-data.attributes[1]; fn = isless)
 
 Removes the edges of the graph whose weight value of `attribute` is greater than the given
 `filter_value`. If `attribute` is not specified, this defaults to the first attribute within
 the DataGraph's `EdgeData`.
+
+`fn` is a function that takes an input of two scalar values and is broadcast to the data vector.
+For example, isless, isgreater, isequal
 """
 function filter_edges(
     dg::DataDiGraph,
     filter_val::R,
-    attribute::String = dg.edge_data.attributes[1]
+    attribute::String = dg.edge_data.attributes[1];
+    fn::Function = isless
 ) where {R <: Real}
 
     nodes           = dg.nodes
@@ -134,7 +142,7 @@ function filter_edges(
     M2 = typeof(get_edge_data(dg))
     T3 = eltype(get_graph_data(dg))
 
-    bool_vec = dg.edge_data.data[:, edge_attribute_map[attribute]] .< filter_val
+    bool_vec = fn.(dg.edge_data.data[:, edge_attribute_map[attribute]], filter_val)
 
     new_edges = edges[bool_vec]
     new_edge_data = edge_data[bool_vec, :]
