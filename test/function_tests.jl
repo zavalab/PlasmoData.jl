@@ -17,7 +17,7 @@ for i in 1:length(edges)
     add_edge_data!(ddg, edges[i], edge_data[i])
 end
 
-dg = matrix_to_graph(random_matrix, true, "matrix_value")
+dg = matrix_to_graph(random_matrix, diagonal = true, attribute = "matrix_value")
 
 @testset "function tests" begin
     @test nodes_to_index(dg, Graphs.connected_components(dg)[1]) == Graphs.connected_components(dg.g)[1]
@@ -94,7 +94,7 @@ end
 @test average_degree(ddg) == length(ddg.edges) * 2 / length(ddg.nodes)
 
 matrix = [1 2 2; 1 1 3; 1 1 1]
-dg = matrix_to_graph(matrix, true)
+dg = matrix_to_graph(matrix, diagonal = true)
 
 @testset "pathway functions" begin
     @test DataGraphs.has_path(dg, (1, 1), (3, 3))

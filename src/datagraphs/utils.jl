@@ -142,8 +142,8 @@ function _build_matrix_graph!(
 end
 
 """
-    matrix_to_graph(matrix, diagonal = true, attribute="weight")
-    matrix_to_graph(array_3d, diagonal = true, attribute_list = ["weight\$i" for i in 1:size(array_3d)[3]])
+    matrix_to_graph(matrix; diagonal = true, attribute="weight")
+    matrix_to_graph(array_3d; diagonal = true, attributes = ["weight\$i" for i in 1:size(array_3d)[3]])
 
 Constructs a `DataGraph` object from a matrix and saves the matrix data as node attributes under
 the name `attribute`. If `diagonal = false`, the graph has a mesh structure, where each matrix entry is represented by
@@ -155,7 +155,7 @@ the third dimension as different weights (i.e., for array of size dim1, dim2, an
 `attribute_list` can be defined by the user to give names to each weight in the third dimension.
 """
 function matrix_to_graph(
-    matrix::AbstractMatrix{T1},
+    matrix::AbstractMatrix{T1};
     diagonal::Bool = true,
     attribute::String = "weight"
 ) where {T1 <: Any}
@@ -196,9 +196,9 @@ function matrix_to_graph(
 end
 
 function matrix_to_graph(
-    array_3d::AbstractArray{T1, 3},
+    array_3d::AbstractArray{T1, 3};
     diagonal::Bool = true,
-    attribute_list::Vector{String} = ["weight$i" for i in 1:size(array_3d)[3]]
+    attributes::Vector{String} = ["weight$i" for i in 1:size(array_3d)[3]]
 ) where {T1 <: Any}
 
     dim1, dim2, dim3 = size(array_3d)
@@ -224,8 +224,8 @@ function matrix_to_graph(
 
     simple_graph = Graphs.SimpleGraph(length(edges), fadjlist)
 
-    dg.node_data.attributes = attribute_list
-    for (i, attribute) in enumerate(attribute_list)
+    dg.node_data.attributes = attributes
+    for (i, attribute) in enumerate(attributes)
         dg.node_data.attribute_map[attribute] = i
     end
 
@@ -578,7 +578,7 @@ function filter_edges(
 end
 
 """
-    run_EC_on_nodes(datagraph, threshold_range, attribute, scale = false)
+    run_EC_on_nodes(dg, threshold_range; attribute = dg.node_data.attributes[1], scale = false)
 
 Returns the Euler Characteristic Curve by filtering the nodes of the graph at each value in `threshold_range`
 and computing the Euler Characteristic after each filtration. If `attribute` is not defined, it defaults
@@ -587,7 +587,7 @@ the Euler Characteristic by the total number of objects (nodes + edges) in the o
 """
 function run_EC_on_nodes(
     dg::DataGraph,
-    thresh,
+    thresh;
     attribute::String = dg.node_data.attributes[1],
     scale::Bool = false
 )
@@ -625,7 +625,7 @@ function run_EC_on_nodes(
 end
 
 """
-    run_EC_on_edges(datagraph, threshold_range, attribute, scale = false)
+    run_EC_on_edges(dg, threshold_range; attribute = dg.edge_data.attributes[1], scale = false)
 
 Returns the Euler Characteristic Curve by filtering the edges of the graph at each value in `threshold_range`
 and computing the Euler Characteristic after each filtration. If `attribute` is not defined, it defaults
@@ -634,7 +634,7 @@ the Euler Characteristic by the total number of objects (nodes + edges) in the o
 """
 function run_EC_on_edges(
     dg::DataGraph,
-    thresh,
+    thresh;
     attribute::String = dg.edge_data.attributes[1],
     scale::Bool = false
 )

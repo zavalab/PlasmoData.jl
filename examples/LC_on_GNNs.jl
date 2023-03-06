@@ -38,7 +38,7 @@ function getdataset()
     for i in 1:200
         datagraph = matrix_to_graph(data[i, :, :])
         gnn_graph = GNNGraph(datagraph.g,
-            ndata = get_node_data(datagraph).data'
+            ndata = get_node_data(datagraph)'
         )
         push!(graphs, gnn_graph)
     end

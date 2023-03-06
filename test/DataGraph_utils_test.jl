@@ -1,7 +1,7 @@
 Random.seed!(10)
 random_matrix = rand(10, 10)
 
-dg = matrix_to_graph(random_matrix, true, "matrix_value")
+dg = matrix_to_graph(random_matrix, diagonal = true, attribute = "matrix_value")
 
 @testset "matrix_to_graph test1" begin
     @test length(dg.nodes) == 100
@@ -13,7 +13,7 @@ dg = matrix_to_graph(random_matrix, true, "matrix_value")
     @test test_map(dg.edges, dg.edge_map)
 end
 
-dg = matrix_to_graph(random_matrix, false, "matrix_value")
+dg = matrix_to_graph(random_matrix, diagonal = false, attribute = "matrix_value")
 
 @testset "matrix_to_graph test2" begin
     @test length(dg.nodes) == 100
@@ -30,7 +30,7 @@ end
 random_array = rand(10, 10, 5)
 attribute_names = ["matrix1", "matrix2", "matrix3", "matrix4", "matrix5"]
 
-dg = matrix_to_graph(random_array, true, attribute_names)
+dg = matrix_to_graph(random_array, diagonal = true, attributes = attribute_names)
 
 @testset "matrix_to_graph test3" begin
     @test length(dg.nodes) == 100
@@ -76,7 +76,7 @@ end
 
 matrix = [1 2 2; 1 1 3; 1 1 1]
 
-dg = matrix_to_graph(matrix, false)
+dg = matrix_to_graph(matrix, diagonal = false)
 
 filtered_graph = filter_nodes(dg, 2.5)
 
@@ -151,7 +151,7 @@ remove_edge!(dg, (2,1))
     @test get_edge_data(dg)[2] == 4
 end
 
-dg = matrix_to_graph(matrix, false)
+dg = matrix_to_graph(matrix, diagonal = false)
 
 agg_graph = aggregate(dg, [(2, 2), (2, 3)], "agg_node")
 
