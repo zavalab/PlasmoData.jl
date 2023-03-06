@@ -253,6 +253,40 @@ function average_degree(
     return sum(degrees) / length(degrees)
 end
 
+function Graphs.clique_percolation(
+    dg::DataGraph;
+    k::Int = 3
+)
+
+    cp = Graphs.clique_percolation(dg.g, k = k)
+
+    community_list = []
+    for i in 1:length(cp)
+        next_community = index_to_nodes(dg, [j for j in cp[i]])
+        push!(community_list, next_community)
+    end
+
+    return community_list
+end
+
+function Graphs.maximal_cliques(
+    dg::DataGraph,
+)
+
+    mc = Graphs.maximal_cliques(dg.g)
+
+    cliques_list = []
+    for i in 1:length(mc)
+        next_clique = index_to_nodes(dg, [j for j in mc[i]])
+        push!(cliques_list, next_clique)
+    end
+
+    return cliques_list
+end
+
+# Graphs.bfs_tree
+# Graphs.dfs_tree; make upstream/downstream
+
 """
     Graphs.has_path(datagraph, src_node, dst_node)
 
@@ -419,6 +453,76 @@ function get_path(
 
     return path
 end
+
+"""
+    upstream_nodes(dg::DataDiGraph, node; algorithm = "bfs")
+
+Return a list of all the nodes that are upstream of `node` in the DataDiGraph `dg`.
+Algorithm options are "bfs" and "dfs"
+"""
+function upstream_nodes(
+    dg::DataDiGraph,
+    node::N;
+    algorithm::String = "bfs"
+) where {N <: Any}
+
+    return _get_bfs_dfs_list(dg, node, algorithm, :in)
+end
+
+"""
+    downstream_nodes(dg::DataDiGraph, node; algorithm = "bfs")
+
+Return a list of all the nodes that are downstream of `node` in the DataDiGraph `dg`.
+Algorithm options are "bfs" and "dfs"
+"""
+function downstream_nodes(
+    dg::DataDiGraph,
+    node::N;
+    algorithm::String = "bfs"
+) where {N <: Any}
+
+    return _get_bfs_dfs_list(dg, node, algorithm, :out)
+end
+
+"""
+    _get_bfs_dfs_list(dg::DataDiGraph, node, algorithm, dir)
+
+Returns the list of nodes that are upstream or downstream of `node` in the DataDiGraph `dg`
+"""
+function _get_bfs_dfs_list(
+    dg::DataDiGraph,
+    node::N,
+    algorithm::String,
+    dir::Symbol
+) where {N <: Any}
+
+    if !((algorithm == "bfs") || (algorithm == "dfs"))
+        error("Given algorithm does not exist; must be bfs or dfs")
+    end
+
+    if !(node in dg.nodes)
+        error("$node is not in DataDiGraph")
+    end
+
+    nodes = dg.nodes
+    node_map = dg.node_map
+
+    if algorithm == "bfs"
+        subgraph = bfs_tree(dg.g, node_map[node]; dir = dir)
+    else
+        subgraph = dfs_tree(dg.g, node_map[node]; dir = dir)
+    end
+
+    node_list = []
+    for (index, node) in enumerate(nodes)
+        if (length(subgraph.fadjlist[index]) > 0) || (length(subgraph.badjlist[index]) > 0)
+            push!(node_list, node)
+        end
+    end
+
+    return node_list
+end
+
 
 """
     nodes_to_index(datagraph, node_list)
