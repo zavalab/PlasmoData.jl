@@ -100,6 +100,9 @@ add_node_dataset!(dg4, node_data_dict, "weight4")
     @test get_node_data(dg, "weight") == [6.3, 7.2, 8.6, 4.3]
     @test_throws ErrorException get_node_data(dg, ["weight3", "weight5"])
     @test_throws ErrorException get_node_data(dg, "weight5")
+
+    @test_throws ErrorException get_node_data(dg, ["weight3"], nodes = [1, 3, 7])
+    @test get_node_data(dg, ["weight3", "weight4"], nodes = [7, :node3]) == [17.0 3.0; 2.2 1.0]
 end
 
 # Test add_edge! function 1

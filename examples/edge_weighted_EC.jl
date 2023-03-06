@@ -19,7 +19,7 @@ for i in 1:30
     mat = abs.(data[i,:,:]) - I
     h = symmetric_matrix_to_graph(mat[:,:])
     println("built graph")
-    EC_vals = run_EC_on_edges(h, thresh, scale = true)
+    EC_vals = run_EC_on_edges(h, thresh; scale = false)
     println("Running EC")
     ECs[:,i] .= EC_vals
     println(i)

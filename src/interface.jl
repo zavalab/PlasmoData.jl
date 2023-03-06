@@ -32,14 +32,16 @@ function get_graph_data(
 end
 
 """
-    get_node_data(dg::D, attribute_list) where {D <: DataGraphUnion}
+    get_node_data(dg::D, attribute_list; nodes = dg.nodes) where {D <: DataGraphUnion}
 
 Returns a matrix of the node data for the attributes in attribute list in the order
-that the attributes are defined in the list
+that the attributes are defined in the list. If `nodes` is defined, returns the subset
+of data corresponding to `nodes` in the order that they are defined in `nodes`
 """
 function get_node_data(
     dg::D,
-    attribute_list::Vector{String}
+    attribute_list::Vector{String};
+    nodes::Vector = dg.nodes
 ) where {D <: DataGraphUnion}
     node_data = get_node_data(dg)
     attributes = dg.node_data.attributes
@@ -49,14 +51,23 @@ function get_node_data(
         error("Attribute(s) in attribute_list are not defined in NodeData")
     end
 
+    if !(all(x -> x in dg.nodes, nodes))
+        error("Node(s) in nodes not defined in DataGraph")
+    end
+
     attribute_indexes = [attribute_map[i] for i in attribute_list]
 
-    return node_data[:, attribute_indexes]
+    if nodes == dg.nodes
+        return node_data[:, attribute_indexes]
+    else
+        node_indexes = [dg.node_map[i] for i in nodes]
+        return node_data[node_indexes, attribute_indexes]
+    end
 end
 
 
 """
-    get_edge_data(dg::D, attribute_list) where {D <: DataGraphUnion}
+    get_edge_data(dg::D, attribute_list; edges) where {D <: DataGraphUnion}
 
 Returns a matrix of the edge data for the attributes in attribute list in the order
 that the attributes are defined in the list
@@ -100,7 +111,7 @@ end
 
 
 """
-    get_edge_data(dg::D, attribute_list) where {D <: DataGraphUnion}
+    get_edge_data(dg::D, attribute) where {D <: DataGraphUnion}
 
 Returns a vector of the edge data corresponding to the attribute
 """

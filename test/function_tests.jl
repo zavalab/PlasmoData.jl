@@ -17,7 +17,7 @@ for i in 1:length(edges)
     add_edge_data!(ddg, edges[i], edge_data[i])
 end
 
-dg = matrix_to_graph(random_matrix, true, "matrix_value")
+dg = matrix_to_graph(random_matrix, diagonal = true, attribute = "matrix_value")
 
 @testset "function tests" begin
     @test nodes_to_index(dg, Graphs.connected_components(dg)[1]) == Graphs.connected_components(dg.g)[1]
@@ -59,6 +59,16 @@ dg = matrix_to_graph(random_matrix, true, "matrix_value")
     @test Graphs.degree_histogram(ddg) == Graphs.degree_histogram(ddg.g)
     @test Graphs.degree_centrality(dg) == Graphs.degree_centrality(dg.g)
     @test Graphs.degree_centrality(ddg) == Graphs.degree_centrality(ddg.g)
+
+    @test Graphs.clique_percolation(dg, k = 1)[1] == index_to_nodes(dg, [i for i in Graphs.clique_percolation(dg.g, k = 1)[1]])
+    @test Graphs.clique_percolation(dg)[1] == index_to_nodes(dg, [i for i in Graphs.clique_percolation(dg.g)[1]])
+
+    mc_dg = Graphs.maximal_cliques(dg)
+    mc_dgg = Graphs.maximal_cliques(dg.g)
+
+    @test length(mc_dg) == length(mc_dgg)
+    @test mc_dg[1] == index_to_nodes(dg, mc_dgg[1])
+    @test mc_dg[5] == index_to_nodes(dg, mc_dgg[5])
 end
 
 @testset "pathway functions" begin
@@ -72,12 +82,19 @@ end
     @test_throws ErrorException DataGraphs.has_path(ddg, 1, 7, 4)
     @test_throws ErrorException get_path(ddg, 7, 3)
     @test_throws ErrorException get_path(ddg, 1, 3, 7)
+
+    @test downstream_nodes(ddg, 1) == [1, 3, 4, 5, 6]
+    @test upstream_nodes(ddg, 5) == [1, 2, 4, 5]
+    @test_throws ErrorException downstream_nodes(ddg, 1, algorithm = "other")
+    @test_throws ErrorException downstream_nodes(ddg, 7)
+    @test_throws ErrorException upstream_nodes(ddg, 1, algorithm = "other")
+    @test_throws ErrorException upstream_nodes(ddg, 7)
 end
 
 @test average_degree(ddg) == length(ddg.edges) * 2 / length(ddg.nodes)
 
 matrix = [1 2 2; 1 1 3; 1 1 1]
-dg = matrix_to_graph(matrix, true)
+dg = matrix_to_graph(matrix, diagonal = true)
 
 @testset "pathway functions" begin
     @test DataGraphs.has_path(dg, (1, 1), (3, 3))
