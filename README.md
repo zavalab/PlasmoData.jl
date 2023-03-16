@@ -4,7 +4,7 @@
 
 | **Build Status** | **Coverage** |
 |:----------------:|:----------------:|
-| [![build](https://github.com/zavalab/PlasmoData.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/dlcole3/DataGraphs.jl/actions) | [![codecov](https://codecov.io/gh/zavalab/PlasmoData.jl/branch/main/graph/badge.svg?token=0PHL5ZICHA)](https://codecov.io/gh/dlcole3/DataGraphs.jl) |
+| [![build](https://github.com/zavalab/PlasmoData.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/dlcole3/DataGraphs.jl/actions) | [![codecov]([![codecov](https://codecov.io/gh/zavalab/PlasmoData.jl/branch/main/graph/badge.svg?token=LZJ3T1XQZ0)](https://codecov.io/gh/zavalab/PlasmoData.jl))](https://app.codecov.io/gh/zavalab/PlasmoData.jl) |
 
 
 PlasmoData.jl is a package for [Julia](https://julialang.org/) designed for representing data as graphs and for building graph models that contain large amounts of data on the nodes or edges of the graph. This package also has an accompanying package [DataGraphPlots.jl](https://github.com/dlcole3/DataGraphPlots.jl) which can be used for plotting the graphs. 
