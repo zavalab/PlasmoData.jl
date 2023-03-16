@@ -119,7 +119,7 @@ function DataGraph(
     dg = DataGraph()
 
     @inbounds for i in findall(LinearAlgebra.triu(adj_mat) .!= 0)
-        DataGraphs.add_edge!(dg, i[1], i[2])
+        PlasmoData.add_edge!(dg, i[1], i[2])
     end
 
     return dg
@@ -137,7 +137,7 @@ function DataGraph(
     dg = DataGraph()
 
     for i in edge_list
-        DataGraphs.add_edge!(dg, i[1], i[2])
+        PlasmoData.add_edge!(dg, i[1], i[2])
     end
 
     return dg
@@ -273,7 +273,7 @@ function add_edge!(
     dg::DataGraph,
     edge::Tuple
 )
-    DataGraphs.add_edge!(dg::DataGraph, edge[1], edge[2])
+    PlasmoData.add_edge!(dg::DataGraph, edge[1], edge[2])
 end
 
 """

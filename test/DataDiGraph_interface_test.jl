@@ -10,7 +10,7 @@ for i in 1:length(nodes)
 end
 
 for i in 1:length(edges)
-    DataGraphs.add_edge!(dg, edges[i])
+    PlasmoData.add_edge!(dg, edges[i])
     add_edge_data!(dg, edges[i], edge_data[i])
 end
 
@@ -26,15 +26,15 @@ rename_node_attribute!(dg, "weight", "weight1")
 rename_edge_attribute!(dg, "weight", "weight1")
 
 @testset "interface test" begin
-    @test DataGraphs.ne(dg) == length(dg.edges)
-    @test DataGraphs.nv(dg) == length(dg.nodes)
+    @test PlasmoData.ne(dg) == length(dg.edges)
+    @test PlasmoData.nv(dg) == length(dg.nodes)
     @test nn(dg) == length(dg.nodes)
     @test has_node(dg, 4)
     @test !(has_node(dg, 7))
-    @test DataGraphs.has_edge(dg, 1, 3)
-    @test !(DataGraphs.has_edge(dg, 3, 1))
-    @test_throws ErrorException DataGraphs.has_edge(dg, 7, 3)
-    @test_throws ErrorException DataGraphs.has_edge(dg, 3, 7)
+    @test PlasmoData.has_edge(dg, 1, 3)
+    @test !(PlasmoData.has_edge(dg, 3, 1))
+    @test_throws ErrorException PlasmoData.has_edge(dg, 7, 3)
+    @test_throws ErrorException PlasmoData.has_edge(dg, 3, 7)
     @test dg.node_data.attributes == ["weight1"]
     @test dg.node_data.attribute_map["weight1"] == 1
     @test dg.edge_data.attributes == ["weight1"]

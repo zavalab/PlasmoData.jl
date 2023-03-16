@@ -269,7 +269,7 @@ function symmetric_matrix_to_graph(
 
     for j in 1:dim2
         for i in (j + 1):dim1
-            DataGraphs.add_edge!(dg, j, i)
+            PlasmoData.add_edge!(dg, j, i)
             add_edge_data!(dg, i, j, matrix[i,j], attribute)
         end
     end

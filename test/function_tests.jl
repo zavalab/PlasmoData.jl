@@ -13,7 +13,7 @@ for i in 1:length(nodes)
 end
 
 for i in 1:length(edges)
-    DataGraphs.add_edge!(ddg, edges[i])
+    PlasmoData.add_edge!(ddg, edges[i])
     add_edge_data!(ddg, edges[i], edge_data[i])
 end
 
@@ -72,14 +72,14 @@ dg = matrix_to_graph(random_matrix, diagonal = true, attribute = "matrix_value")
 end
 
 @testset "pathway functions" begin
-    @test DataGraphs.has_path(ddg, 1, 6)
-    @test DataGraphs.has_path(ddg, 1, 4, 6)
+    @test PlasmoData.has_path(ddg, 1, 6)
+    @test PlasmoData.has_path(ddg, 1, 4, 6)
     @test get_path(ddg, 1, 6) == [1, 4, 6]
     @test get_path(ddg, 1, 4, 6) == [1, 4, 6]
     @test get_path(ddg, 1, 6; algorithm = "BellmanFord") == [1, 4, 6]
     @test get_path(ddg, 1, 4, 6; algorithm = "BellmanFord") == [1, 4, 6]
-    @test_throws ErrorException DataGraphs.has_path(ddg, 1, 7)
-    @test_throws ErrorException DataGraphs.has_path(ddg, 1, 7, 4)
+    @test_throws ErrorException PlasmoData.has_path(ddg, 1, 7)
+    @test_throws ErrorException PlasmoData.has_path(ddg, 1, 7, 4)
     @test_throws ErrorException get_path(ddg, 7, 3)
     @test_throws ErrorException get_path(ddg, 1, 3, 7)
 
@@ -97,14 +97,14 @@ matrix = [1 2 2; 1 1 3; 1 1 1]
 dg = matrix_to_graph(matrix, diagonal = true)
 
 @testset "pathway functions" begin
-    @test DataGraphs.has_path(dg, (1, 1), (3, 3))
-    @test DataGraphs.has_path(dg, (1, 1), (2, 1), (3, 3))
+    @test PlasmoData.has_path(dg, (1, 1), (3, 3))
+    @test PlasmoData.has_path(dg, (1, 1), (2, 1), (3, 3))
     @test get_path(dg, (1, 1), (3, 3)) == [(1, 1), (2, 2), (3, 3)]
     @test get_path(dg, (1, 1), (2, 1), (3, 3)) == [(1, 1), (2, 1), (3, 2), (3, 3)]
     @test get_path(dg, (1, 1), (3, 3); algorithm = "BellmanFord") == [(1, 1), (2, 2), (3, 3)]
     @test get_path(dg, (1, 1), (2, 1), (3, 3); algorithm = "BellmanFord") == [(1, 1), (2, 1), (2, 2), (3, 3)]
-    @test_throws ErrorException DataGraphs.has_path(dg, (1, 1), (3, 4))
-    @test_throws ErrorException DataGraphs.has_path(dg, (1, 1), (3, 3), (3, 4))
+    @test_throws ErrorException PlasmoData.has_path(dg, (1, 1), (3, 4))
+    @test_throws ErrorException PlasmoData.has_path(dg, (1, 1), (3, 3), (3, 4))
     @test_throws ErrorException get_path(dg, (1, 4), (3, 3))
     @test_throws ErrorException get_path(dg, (1, 1), (2, 4), (3, 3))
 end

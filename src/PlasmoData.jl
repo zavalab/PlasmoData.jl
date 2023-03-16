@@ -1,4 +1,4 @@
-module DataGraphs
+module PlasmoData
 
 using Graphs
 using SparseArrays

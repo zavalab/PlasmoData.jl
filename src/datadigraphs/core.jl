@@ -66,7 +66,7 @@ function DataDiGraph(
             isnz = (adj_mat.nzval[rind] != zero(T))
             if isnz
                 r = adj_mat.rowval[rind]
-                DataGraphs.add_edge!(dg, r, c)
+                PlasmoData.add_edge!(dg, r, c)
             end
         end
     end
@@ -179,7 +179,7 @@ function add_edge!(
     edge::Tuple
 )
 
-    DataGraphs.add_edge!(dg, edge[1], edge[2])
+    PlasmoData.add_edge!(dg, edge[1], edge[2])
 end
 
 """
