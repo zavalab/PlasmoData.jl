@@ -7,11 +7,11 @@
 | [![build](https://github.com/zavalab/PlasmoData.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/dlcole3/DataGraphs.jl/actions) | [![codecov](https://codecov.io/gh/zavalab/PlasmoData.jl/branch/main/graph/badge.svg?token=0PHL5ZICHA)](https://codecov.io/gh/dlcole3/DataGraphs.jl) |
 
 
-DataGraphs.jl is a package for [Julia](https://julialang.org/) designed for representing data as graphs and for building graph models that contain large amounts of data on the nodes or edges of the graph. This package also has an accompanying package [DataGraphPlots.jl](https://github.com/dlcole3/DataGraphPlots.jl) which can be used for plotting the graphs. 
+PlasmoData.jl is a package for [Julia](https://julialang.org/) designed for representing data as graphs and for building graph models that contain large amounts of data on the nodes or edges of the graph. This package also has an accompanying package [DataGraphPlots.jl](https://github.com/dlcole3/DataGraphPlots.jl) which can be used for plotting the graphs. 
 
 ## Bug Reports and Support
 
-This package is functional and can be installed as is. It is still under development, and significant changes will continue to come. If you encounter any issues or bugs, please submit them through the [Github issue tracker](https://github.com/dlcole3/DataGraphs.jl/issues). 
+This package is functional and can be installed as is. It is still under development, and significant changes will continue to come. If you encounter any issues or bugs, please submit them through the [Github issue tracker](https://github.com/zavalab/PlasmoData.jl/issues). 
 
 ## Installation
 
@@ -19,13 +19,13 @@ To install this package, you can use
 
 ```julia
 using Pkg
-Pkg.add(url="https://github.com/dlcole3/DataGraphs.jl")
+Pkg.add(url="https://github.com/zavalab/PlasmoData.jl")
 ```
 
 or
 
 ```julia
-pkg> add https://github.com/dlcole3/DataGraphs.jl
+pkg> add https://github.com/zavalab/PlasmoData.jl
 ```
 
 ## Overview
@@ -101,4 +101,4 @@ tensor_graph = tensor_to_graph(random_tensor)
 
 ## Further Examples
 
-To see additional examples of how DataGraphs.jl can be used or applied, please see the [examples](https://github.com/dlcole3/DataGraphs.jl/tree/main/examples) directory within this repository.
+To see additional examples of how DataGraphs.jl can be used or applied, please see the [examples](https://github.com/zavalab/PlasmoData.jl/tree/main/examples) directory within this repository.
