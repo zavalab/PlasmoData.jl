@@ -476,8 +476,8 @@ function filter_nodes(
 
     if length(edge_attributes) > 0
         new_edge_data         = edge_data[old_edge_index, :]
-        new_dg.edge_data.data = new_edge_data
-        new_dg.edge_data.attribute_map = dg.edge_data.attribute_map
+        new_dg.edge_data.data = copy(new_edge_data)
+        new_dg.edge_data.attribute_map = copy(dg.edge_data.attribute_map)
     end
 
     simple_graph = Graphs.SimpleGraph(T(length(new_edges)), fadjlist)
@@ -487,10 +487,10 @@ function filter_nodes(
     new_dg.edges                = new_edges
     new_dg.edge_map             = new_edge_map
     new_dg.node_map             = new_node_map
-    new_dg.node_data.attributes = node_attributes
-    new_dg.edge_data.attributes = edge_attributes
+    new_dg.node_data.attributes = copy(node_attributes)
+    new_dg.edge_data.attributes = copy(edge_attributes)
     new_dg.node_data.data       = new_node_data
-    new_dg.node_data.attribute_map = dg.node_data.attribute_map
+    new_dg.node_data.attribute_map = copy(dg.node_data.attribute_map)
 
     return new_dg
 end
@@ -565,14 +565,14 @@ function filter_edges(
     new_dg.nodes                = nodes
     new_dg.edges                = new_edges
     new_dg.edge_data.data       = new_edge_data
-    new_dg.node_map             = node_map
+    new_dg.node_map             = copy(node_map)
     new_dg.edge_map             = new_edge_map
-    new_dg.node_data.attributes = node_attributes
-    new_dg.edge_data.attributes = edge_attributes
-    new_dg.node_data.data       = dg.node_data.data
+    new_dg.node_data.attributes = copy(node_attributes)
+    new_dg.edge_data.attributes = copy(edge_attributes)
+    new_dg.node_data.data       = copy(dg.node_data.data)
 
-    new_dg.node_data.attribute_map = dg.node_data.attribute_map
-    new_dg.edge_data.attribute_map = dg.edge_data.attribute_map
+    new_dg.node_data.attribute_map = copy(dg.node_data.attribute_map)
+    new_dg.edge_data.attribute_map = copy(dg.edge_data.attribute_map)
 
     return new_dg
 end
@@ -879,9 +879,9 @@ function aggregate(
         node_data_to_keep = node_data[indices_to_keep, :]
         new_node_data     = vcat(node_data_to_keep, node_weight_avg)
 
-        new_dg.node_data.attributes    = node_attributes
-        new_dg.node_data.attribute_map = node_attribute_map
-        new_dg.node_data.data          = new_node_data
+        new_dg.node_data.attributes    = copy(node_attributes)
+        new_dg.node_data.attribute_map = copy(node_attribute_map)
+        new_dg.node_data.data          = copy(new_node_data)
     end
 
     edges              = dg.edges
@@ -998,9 +998,9 @@ function aggregate(
             new_edge_data[new_index, :] = edge_data_avg[:]
         end
 
-        new_dg.edge_data.attributes    = edge_attributes
-        new_dg.edge_data.attribute_map = edge_attribute_map
-        new_dg.edge_data.data           = new_edge_data
+        new_dg.edge_data.attributes    = copy(edge_attributes)
+        new_dg.edge_data.attribute_map = copy(edge_attribute_map)
+        new_dg.edge_data.data          = copy(new_edge_data)
     end
 
     simple_graph = Graphs.SimpleGraph(T(length(new_edges)), fadjlist)
