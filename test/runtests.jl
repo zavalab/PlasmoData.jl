@@ -1,5 +1,5 @@
 using Test
-using DataGraphs, SparseArrays, LinearAlgebra, Graphs, Random
+using PlasmoData, SparseArrays, LinearAlgebra, Graphs, Random
 
 function test_map(vector, map)
     for i in 1:length(vector)
