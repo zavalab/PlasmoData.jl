@@ -101,4 +101,4 @@ tensor_graph = tensor_to_graph(random_tensor)
 
 ## Further Examples
 
-To see additional examples of how DataGraphs.jl can be used or applied, please see the [examples](https://github.com/zavalab/PlasmoData.jl/tree/main/examples) directory within this repository.
+To see additional examples of how DataGraphs.jl can be used, please see the [examples](https://github.com/zavalab/PlasmoData.jl/tree/main/examples) directory within this repository.
