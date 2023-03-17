@@ -1,10 +1,10 @@
 using Revise
-using DataGraphs, Graphs
+using PlasmoData, Graphs
 using DataGraphPlots
 
 mat = rand(10, 10)
 
-mat_graph = DataGraphs.matrix_to_graph(mat)
+mat_graph = matrix_to_graph(mat)
 
 plot_graph(mat_graph, linecolor=:gray, C=1, K=.01, xdim = 400, ydim = 400, node_z = mat_graph.node_data.data, nodecolor = :algae)
 
