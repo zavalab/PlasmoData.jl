@@ -1,5 +1,5 @@
 using Revise
-using DataGraphs, Graphs
+using PlasmoData, Graphs
 using DataGraphPlots
 
 dg = DataGraph()
@@ -16,11 +16,11 @@ add_node_data!(dg, 3, 2, "weight")
 add_node_data!(dg, "node4", 4, "weight")
 add_node_data!(dg, :node5, 1, "weight")
 
-DataGraphs.add_edge!(dg, 1, 2)
-DataGraphs.add_edge!(dg, 2, 3)
-DataGraphs.add_edge!(dg, "node4", 1)
-DataGraphs.add_edge!(dg, :node5, 2)
-DataGraphs.add_edge!(dg, 3, "node4")
+PlasmoData.add_edge!(dg, 1, 2)
+PlasmoData.add_edge!(dg, 2, 3)
+PlasmoData.add_edge!(dg, "node4", 1)
+PlasmoData.add_edge!(dg, :node5, 2)
+PlasmoData.add_edge!(dg, 3, "node4")
 
 add_edge_data!(dg, 1, 2, 17.4, "weight")
 add_edge_data!(dg, 2, 3, 4.2, "weight")

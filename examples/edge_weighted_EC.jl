@@ -1,5 +1,5 @@
 using Revise
-using DataGraphs, Graphs
+using PlasmoData, Graphs
 using JLD, LinearAlgebra
 using Plots, Statistics
 using DataGraphPlots
@@ -32,7 +32,7 @@ for i in 1:30
 
     for j in 1:39
         for k in 1:39
-            DataGraphs.add_edge!(dg, k, j)
+            PlasmoData.add_edge!(dg, k, j)
             add_edge_data!(dg, k, j, datai[k,j], "weight")
         end
     end

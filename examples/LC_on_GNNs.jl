@@ -1,5 +1,5 @@
 using Revise
-using DataGraphs, Graphs, Statistics, LinearAlgebra, SparseArrays, JLD, Random
+using PlasmoData, Graphs, Statistics, LinearAlgebra, SparseArrays, JLD, Random
 using GraphNeuralNetworks, Flux, MLUtils
 using Flux:onecold, onehotbatch
 using Flux.Losses: logitbinarycrossentropy

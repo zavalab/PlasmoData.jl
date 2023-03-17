@@ -1,5 +1,5 @@
 using Revise
-using DataGraphs, Graphs
+using PlasmoData, Graphs
 using JLD
 
 # Read in the simulated liquid crystal (LC) data from the paper Smith and Zavala 2021
