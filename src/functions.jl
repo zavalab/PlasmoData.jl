@@ -284,11 +284,8 @@ function Graphs.maximal_cliques(
     return cliques_list
 end
 
-# Graphs.bfs_tree
-# Graphs.dfs_tree; make upstream/downstream
-
 """
-    Graphs.has_path(datagraph, src_node, dst_node)
+    has_path(datagraph, src_node, dst_node)
 
 Returns true if a path exists in the `datagraph` between `src_node` to `dst_node`. Else returns false
 """
@@ -312,7 +309,7 @@ function has_path(
 end
 
 """
-    Graphs.has_path(datagraph, src_node, intermediate_node, dst_node)
+    has_path(datagraph, src_node, intermediate_node, dst_node)
 
 Returns true if a path exists in the `datagraph` between `src_node` and `dst_node` which
 passes through the `intermediate node`. Else returns false

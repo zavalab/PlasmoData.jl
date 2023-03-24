@@ -1,15 +1,6 @@
 # PlasmoData
 
-| **Build Status** | **Coverage** |
-|:----------------:|:----------------:|
-| [![build](https://github.com/zavalab/PlasmoData.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/zavalab/PlasmoData.jl/actions) | [![codecov](https://codecov.io/gh/zavalab/PlasmoData.jl/branch/main/graph/badge.svg?token=LZJ3T1XQZ0)](https://app.codecov.io/gh/zavalab/PlasmoData.jl) |
-
-
-PlasmoData.jl is a package for [Julia](https://julialang.org/) designed for representing and modeling data as graphs and for building graph models that contain large amounts of data on the nodes or edges of the graph. This package also has an accompanying package [DataGraphPlots.jl](https://github.com/dlcole3/DataGraphPlots.jl) which can be used for plotting the graphs. 
-
-## Bug Reports and Support
-
-This package is functional and can be installed as is. It is still under development, and significant changes will continue to come. If you encounter any issues or bugs, please submit them through the [Github issue tracker](https://github.com/zavalab/PlasmoData.jl/issues). 
+PlasmoData.jl is a package for [Julia](https://julialang.org/) designed for representing and modeling data as graphs and for building graph models that contain large amounts of data on the nodes or edges of the graph. This package also has an accompanying package [DataGraphPlots.jl](https://github.com/zavalab/DataGraphPlots.jl) which can be used for plotting the graphs. 
 
 ## Installation
 
@@ -47,56 +38,7 @@ PlasmoData.jl also includes functions for manipulating graph structure and analy
 
 Support for `DataDiGraph`s is still underway. However, for `DataGraph` objects, all functions shown above have doc strings, which can be accessed through the REPL by first typing `?` and then the function or object name. 
 
-## Getting Started
 
-A `DataGraph` can be initiated by calling 
+## Bug Reports and Support
 
-```julia
-dg = DataGraph()
-```
-
-PlasmoData.jl also supports building a `DataGraph` from an adjacency matrix. The `DataGraph` can be changed by adding nodes or edges to the graph, as shown below. `add_node!` takes two arguments: the `DataGraph` of interest and the node name (any data type is permitted). `add_edge` takes three arguments, the `DataGraph` of interest, and the names of two nodes in the graph. 
-
-```julia
-add_node!(dg, "node1")
-add_node!(dg, :node2)
-add_node!(dg, 3)
-
-add_edge!(dg, "node1", :node2)
-add_edge!(dg, 3, :node2)
-add_edge!(dg, "node1", 3)
-```
-
-Data can be added to these nodes or edges by calling `add_node_data!` or `add_edge_data!` as shown below. Here, these functions take similar arguments to `add_node!` or `add_edge!`, but they also take two additional arguments, one for the weight value and one for the attribute name (must be a string). When setting a new attribute, the other nodes or edges will receive a default value of 0. 
-
-```julia
-add_node_data!(dg, "node1", 1.0,   "node_weight_1")
-add_node_data!(dg, :node2,  2.0, "node_weight_1")
-add_node_data!(dg, 3,       3.0,   "node_weight_1")
-
-add_edge_data!(dg, "node1", :node2,  4.0, "edge_weight_1")
-add_edge_data!(dg, :node2,  3,       5.0, "edge_weight_1")
-add_edge_data!(dg, 3,       "node1", 6.0, "edge_weight_1")
-```
-
-Note that for `DataGraph`s, the order of the nodes in an edge is not important, but it is important for `DataDiGraph`s. 
-
-There are also functions for direclty building a graph from a set of data. Examples are shown below.
-
-```julia
-random_matrix = rand(20, 20)
-
-matrix_graph = matrix_to_graph(random_matrix, "matrix_weight")
-
-symmetric_random_matrix = random_matrix .+ random_matrix'
-
-symmetric_matrix_graph = symmetric_matrix_to_graph(symmetric_random_matrix, "matrix_weight")
-
-random_tensor = rand(20, 20, 15)
-
-tensor_graph = tensor_to_graph(random_tensor)
-```
-
-## Further Examples
-
-To see additional examples of how PlasmoData.jl can be used, please see the [examples](https://github.com/zavalab/PlasmoData.jl/tree/main/examples) directory within this repository.
+This package is under development, and significant changes will continue to come. If you encounter any issues or bugs, please submit them through the [Github issue tracker](https://github.com/zavalab/PlasmoData.jl/issues). 
