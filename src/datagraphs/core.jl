@@ -17,8 +17,8 @@ function DataGraph(
     edge_map::Dict{Tuple{T}, Int} = Dict{Any, Int}(),
     node_data::M1 = Array{Float64}(undef, 0, 0),
     edge_data::M2 = Array{Float64}(undef, 0, 0),
-    graph_data::Vector{T3} = Vector{Float64}()
-) where {T <: Int, T1, T2, T3, M1 <: Matrix{T1}, M2 <: Matrix{T2}}
+    graph_data::Vector = Vector{Float64}()
+) where {T <: Int, M1 <: Matrix, M2 <: Matrix}
 
     if length(edges) != ne
         error("Defined edges do not match ne")
@@ -48,11 +48,11 @@ function DataGraph(
         graph_attribute_map[graph_attributes[i]] = i
     end
 
-    node_data_struct = NodeData(node_attributes, node_attribute_map, node_data)
-    edge_data_struct = EdgeData(edge_attributes, edge_attribute_map, edge_data)
-    graph_data_struct = GraphData(graph_attributes, graph_attribute_map, graph_data)
+    node_data_struct = NodeData{T, eltype(node_data), M1}(node_attributes, node_attribute_map, node_data)
+    edge_data_struct = EdgeData{T, eltype(edge_data), M2}(edge_attributes, edge_attribute_map, edge_data)
+    graph_data_struct = GraphData{T, eltype(graph_data)}(graph_attributes, graph_attribute_map, graph_data)
 
-    DataGraph{T, M1, M2}(
+    DataGraph{T, eltype(node_data), eltype(edge_data), eltype(graph_data), M1, M2}(
         g, nodes, edges, node_map, edge_map,
         node_data_struct, edge_data_struct, graph_data_struct
     )
