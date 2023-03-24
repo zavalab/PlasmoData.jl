@@ -1,8 +1,8 @@
 # PlasmoData
 
-| **Build Status** | **Coverage** |
-|:----------------:|:----------------:|
-| [![build](https://github.com/zavalab/PlasmoData.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/zavalab/PlasmoData.jl/actions) | [![codecov](https://codecov.io/gh/zavalab/PlasmoData.jl/branch/main/graph/badge.svg?token=LZJ3T1XQZ0)](https://app.codecov.io/gh/zavalab/PlasmoData.jl) |
+| **Documentation** | **Build Status** | **Coverage** |
+|:-----------------:|:----------------:|:----------------:|
+| [![doc](https://img.shields.io/badge/docs-dev-blue.svg)](https://zavalab.github.io/PlasmoData.jl/dev) | [![build](https://github.com/zavalab/PlasmoData.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/zavalab/PlasmoData.jl/actions) | [![codecov](https://codecov.io/gh/zavalab/PlasmoData.jl/branch/main/graph/badge.svg?token=LZJ3T1XQZ0)](https://app.codecov.io/gh/zavalab/PlasmoData.jl) |
 
 
 PlasmoData.jl is a package for [Julia](https://julialang.org/) designed for representing and modeling data as graphs and for building graph models that contain large amounts of data on the nodes or edges of the graph. This package also has an accompanying package [DataGraphPlots.jl](https://github.com/dlcole3/DataGraphPlots.jl) which can be used for plotting the graphs. 
