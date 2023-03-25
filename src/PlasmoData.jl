@@ -5,16 +5,52 @@ using SparseArrays
 using Statistics
 using LinearAlgebra
 
-export DataGraph, DataDiGraph, add_node!, add_node_data!, add_edge_data!, adjacency_matrix
-export get_EC, matrix_to_graph, symmetric_matrix_to_graph, mvts_to_graph, tensor_to_graph
-export filter_nodes, filter_edges, run_EC_on_nodes, run_EC_on_edges, aggregate
-export get_node_data, get_edge_data, ne, nn, nv, remove_node!, remove_edge!
-export add_node_attribute!, add_edge_attribute!, has_edge, has_node, has_pathG
-export get_node_attributes, get_edge_attributes, get_path
-export nodes_to_index, index_to_nodes, average_degree, rename_graph_attribute!
-export rename_node_attribute!, rename_edge_attribute!, add_node_dataset!, add_edge_dataset!
-export add_graph_data!, get_graph_data, get_graph_attributes, order_edges!
-export get_ordered_edge_data, downstream_nodes, upstream_nodes
+export DataGraph,
+    DataDiGraph,
+    add_node!,
+    add_node_data!,
+    add_edge_data!,
+    adjacency_matrix,
+    get_EC,
+    matrix_to_graph,
+    symmetric_matrix_to_graph,
+    mvts_to_graph,
+    tensor_to_graph,
+    filter_nodes,
+    filter_edges,
+    run_EC_on_nodes,
+    run_EC_on_edges,
+    aggregate,
+    get_node_data,
+    get_edge_data,
+    ne,
+    nn,
+    nv,
+    remove_node!,
+    remove_edge!,
+    add_node_attribute!,
+    add_edge_attribute!,
+    has_edge,
+    has_node,
+    has_path,
+    get_node_attributes,
+    get_edge_attributes,
+    get_path,
+    nodes_to_index,
+    index_to_nodes,
+    average_degree,
+    rename_graph_attribute!,
+    rename_node_attribute!,
+    rename_edge_attribute!,
+    add_node_dataset!,
+    add_edge_dataset!,
+    add_graph_data!,
+    get_graph_data,
+    get_graph_attributes,
+    order_edges!,
+    get_ordered_edge_data,
+    downstream_nodes,
+    upstream_nodes
 
 abstract type AbstractDataGraph{T} <: Graphs.AbstractGraph{T} end
 
@@ -32,10 +68,10 @@ NodeData have the following attributes:
  `data`: Matrix with the number of rows corresponding to the number of nodes in the graph
  and with a column for each attribute in `attributes`
 """
-mutable struct NodeData{T, T1, M1}
+mutable struct NodeData{T, T1, M1 <: AbstractMatrix{T1}}
     attributes::Vector{String}
     attribute_map::Dict{String, T}
-    data::AbstractMatrix{T1}
+    data::M1
 end
 
 """
@@ -52,10 +88,10 @@ EdgeData have the following attributes:
  `data`: Matrix with the number of rows corresponding to the number of edgess in the graph
  and with a column for each attribute in `attributes`
 """
-mutable struct EdgeData{T, T2, M2}
+mutable struct EdgeData{T, T2, M2 <: AbstractMatrix{T2}}
     attributes::Vector{String}
     attribute_map::Dict{String, T}
-    data::AbstractMatrix{T2}
+    data::M2
 end
 
 """
@@ -89,8 +125,8 @@ function NodeData(
     attributes::Vector{String} = Vector{String}(),
     attribute_map::Dict{String, T} = Dict{String, Int}(),
     data::M1 = Array{Float64}(undef, (0, 0))
-) where {T <: Real, T1, M1 <: AbstractMatrix{T1}}
-    NodeData{T, T1, M1}(
+) where {T <: Real, M1 <: AbstractMatrix}
+    NodeData{T, eltype(data), M1}(
         attributes,
         attribute_map,
         data
@@ -109,8 +145,8 @@ function EdgeData(
     attributes::Vector{String} = Vector{String}(),
     attribute_map::Dict{String, T} = Dict{String, Int}(),
     data::M2 = Array{Float64}(undef, (0, 0))
-) where {T <: Real, T2, M2 <: AbstractMatrix{T2}}
-    EdgeData{T, T2, M2}(
+) where {T <: Real, M2 <: AbstractMatrix}
+    EdgeData{T, eltype(data), M2}(
         attributes,
         attribute_map,
         data
