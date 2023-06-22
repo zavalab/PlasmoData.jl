@@ -814,18 +814,21 @@ function remove_edge!(
 end
 
 """
-    aggregate(datagraph, node_list, aggregated_node_name)
+    aggregate(datagraph, node_list, aggregated_node_name; fn = mean)
 
 Aggregates all the nodes in `node_list` into a single node which is called `aggregated_node_name`.
-If nodes have any weight/attribute values defined, These are averaged across all values in the
-`node_list`. Edge weights are also averaged when two or more nodes in the `node_list` are connected
-to the same node and these edges have weights defined on them.
+If nodes have any weight/attribute values defined, these values are combined via the `node_fn` function.
+The default for `node_fn` is Statistics.mean which averages the data for the nodes in `node_list`.
+Edge data are also are also combined via the `edge_fn` when two or more nodes in the `node_list` are
+connected to the same node and these edges have data defined on them. The `edge_fn` also defaults
+to `Statistics.mean`
 """
 function aggregate(
     dg::DataGraph,
     node_set::Vector,
     new_name::N;
-    fn::Function = _default_mean
+    node_fn::Function = _default_mean,
+    edge_fn::Function = _default_mean
 ) where {N <: Any}
     nodes              = dg.nodes
     node_map           = dg.node_map
@@ -875,7 +878,7 @@ function aggregate(
 
     if length(node_attributes) > 0
         node_data_to_avg   = node_data[agg_node_indices, :]
-        node_weight_avg    = fn(node_data_to_avg)
+        node_weight_avg    = node_fn(node_data_to_avg)
 
         node_data_to_keep = node_data[indices_to_keep, :]
         new_node_data     = vcat(node_data_to_keep, node_weight_avg)
@@ -995,7 +998,7 @@ function aggregate(
             new_index = new_edge_map[edge]
             edge_data_to_avg = edge_data[edge_bool_avg_index[edge], :]
 
-            edge_data_avg = fn(edge_data_to_avg)
+            edge_data_avg = edge_fn(edge_data_to_avg)
             new_edge_data[new_index, :] = edge_data_avg[:]
         end
 
