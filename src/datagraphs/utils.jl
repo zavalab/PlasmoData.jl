@@ -824,7 +824,8 @@ to the same node and these edges have weights defined on them.
 function aggregate(
     dg::DataGraph,
     node_set::Vector,
-    new_name::N
+    new_name::N;
+    fn::Function = _default_mean
 ) where {N <: Any}
     nodes              = dg.nodes
     node_map           = dg.node_map
@@ -874,7 +875,7 @@ function aggregate(
 
     if length(node_attributes) > 0
         node_data_to_avg   = node_data[agg_node_indices, :]
-        node_weight_avg    = Statistics.mean(node_data_to_avg; dims=1)
+        node_weight_avg    = fn(node_data_to_avg)
 
         node_data_to_keep = node_data[indices_to_keep, :]
         new_node_data     = vcat(node_data_to_keep, node_weight_avg)
@@ -994,7 +995,7 @@ function aggregate(
             new_index = new_edge_map[edge]
             edge_data_to_avg = edge_data[edge_bool_avg_index[edge], :]
 
-            edge_data_avg = Statistics.mean(edge_data_to_avg; dims = 1)
+            edge_data_avg = fn(edge_data_to_avg)
             new_edge_data[new_index, :] = edge_data_avg[:]
         end
 
