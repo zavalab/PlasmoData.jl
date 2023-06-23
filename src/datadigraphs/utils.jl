@@ -353,7 +353,7 @@ function remove_edge!(
 end
 
 """
-    aggregate(datagraph, node_list, aggregated_node_name; node_fn = mean, edge_fn = mean)
+    aggregate(datadigraph, node_list, aggregated_node_name; node_fn = mean, edge_fn = mean)
 
 Aggregates all the nodes in `node_list` into a single node which is called `aggregated_node_name`.
 If nodes have any weight/attribute values defined, these values are combined via the `node_fn` function.
