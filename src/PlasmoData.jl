@@ -243,6 +243,10 @@ function Base.eltype(
     return eltype(eltype(dg.g.fadjlist))
 end
 
+function _default_mean(x)
+    return Statistics.mean(x; dims = 1)
+end
+
 include("datagraphs/core.jl")
 include("datadigraphs/core.jl")
 include("datadigraphs/utils.jl")
