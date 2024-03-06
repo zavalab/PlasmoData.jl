@@ -170,3 +170,30 @@ agg_graph = aggregate(dg, [(2, 2), (2, 3)], "agg_node")
     @test test_edge_exists(agg_graph, (3, 2), "agg_node")
     @test test_edge_exists(agg_graph, (3, 3), "agg_node")
 end
+
+
+dg = matrix_to_graph(matrix, diagonal = false)
+
+edge_vals = fill(1., length(dg.edges))
+
+add_edge_dataset!(dg, edge_vals, "edge_weight")
+
+agg_graph = aggregate(dg, [(2, 2), (3, 2)], "agg_node", save_agg_edge_data = true)
+agg_graph2 = aggregate(dg, [(2, 2), (3, 2)], "agg_node", save_agg_edge_data = true, node_attributes_to_add = ["weight2"])
+
+dg_extra = matrix_to_graph(matrix, diagonal = false)
+add_edge_dataset!(dg_extra, edge_vals, "weight")
+
+@testset "aggregate test 2" begin
+    @test agg_graph.node_data.attributes == ["weight", "edge_weight"]
+    @test length(agg_graph.node_data.attribute_map) == 2
+    @test get_node_data(agg_graph, "agg_node", "edge_weight") == 1
+    @test get_node_data(agg_graph, (1, 1), "edge_weight") == 0
+    @test agg_graph2.node_data.attributes == ["weight", "weight2"]
+    @test length(agg_graph2.node_data.attribute_map) == 2
+    @test get_node_data(agg_graph2, "agg_node", "weight2") == 1
+    @test get_node_data(agg_graph2, (1, 1), "weight2") == 0
+    @test_throws ErrorException aggregate(dg, [(2,2), (3,2)], "agg_node", save_agg_edge_data = true, node_attributes_to_add = ["edge_weight", "edge_weight2"])
+    @test_throws ErrorException aggregate(dg, [(2,2), (3,2)], "agg_node", save_agg_edge_data = true, node_attributes_to_add = ["weight"])
+    @test_throws ErrorException aggregate(dg_extra, [(2,2), (3,2)], "agg_node", save_agg_edge_data = true)
+end

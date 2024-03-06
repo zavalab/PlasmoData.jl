@@ -13,7 +13,7 @@ function filter_nodes(
     filter_val::R,
     attribute::String=dg.node_data.attributes[1];
     fn::Function = isless
-) where {R <: Real}
+) where {R <: Any}
 
     node_attributes    = dg.node_data.attributes
     edge_attributes    = dg.edge_data.attributes
@@ -119,7 +119,7 @@ function filter_edges(
     filter_val::R,
     attribute::String = dg.edge_data.attributes[1];
     fn::Function = isless
-) where {R <: Real}
+) where {R <: Any}
 
     nodes           = dg.nodes
     edges           = dg.edges
@@ -353,7 +353,10 @@ function remove_edge!(
 end
 
 """
-    aggregate(datadigraph, node_list, aggregated_node_name; node_fn = mean, edge_fn = mean)
+    aggregate(datadigraph, node_list, aggregated_node_name;
+                node_fn = mean, edge_fn = mean, save_agg_edge_data = false,
+                agg_edge_fn = mean, agg_edge_val = 0, node_attributes_to_add = String[]
+    )
 
 Aggregates all the nodes in `node_list` into a single node which is called `aggregated_node_name`.
 If nodes have any weight/attribute values defined, these values are combined via the `node_fn` function.
@@ -361,14 +364,25 @@ The default for `node_fn` is Statistics.mean which averages the data for the nod
 Edge data are also are also combined via the `edge_fn` when two or more nodes in the `node_list` are
 connected to the same node and these edges have data defined on them. The `edge_fn` also defaults
 to `Statistics.mean`
+
+If edges exist between nodes in `node_list`, the data on these edges can optionally be saved on
+the `aggregated_node_name` node by setting `save_agg_edge_data = true`. If true, then the edge data
+on these edges is aggregated using `agg_edge_fn`. If the user wants to define new attribute names for
+this data, they can pass a vector to `node_attributes_to_add`; if no vector is defined, the data will
+be aggregated under the names of the `edge_data` attributes. All other nodes except the aggregated
+nodes will have these attributes initialized as `agg_edge_val`.
 """
 function aggregate(
     dg::DataDiGraph,
     node_set::Vector,
     new_name::N;
     node_fn::Function = _default_mean,
-    edge_fn::Function = _default_mean
-) where {N <: Any}
+    edge_fn::Function = _default_mean,
+    save_agg_edge_data::Bool = false,
+    agg_edge_fn::Function = _default_mean,
+    agg_edge_val::R = 0.,
+    node_attributes_to_add::Vector{String} = String[]
+) where {N <: Any, R <: Any}
 
     nodes              = dg.nodes
     node_map           = dg.node_map
@@ -387,6 +401,26 @@ function aggregate(
 
     if new_name in setdiff(nodes, node_set)
         error("New node name already exists in set of non-aggregated nodes")
+    end
+
+    if save_agg_edge_data
+        if length(dg.edge_data.attributes) > 0 && length(node_attributes_to_add) > 0
+            if length(dg.edge_data.attributes) != length(node_attributes_to_add)
+                error("Length of the node_attributes_to_add does not match the edge_data attributes")
+            end
+            for i in 1:length(node_attributes_to_add)
+                if node_attributes_to_add[i] in node_attributes
+                    error("Attribute name $(node_attributes_to_add[i]) is already defined in node_attributes")
+                end
+            end
+        elseif length(dg.edge_data.attributes) > 0
+            attribute_names = dg.edge_data.attributes
+            for i in 1:length(attribute_names)
+                if attribute_names[i] in node_attributes
+                    error("Edge data attribute names conflict with node data attributes; user must pass node_attributes_to_add")
+                end
+            end
+        end
     end
 
     T = eltype(dg)
@@ -444,6 +478,8 @@ function aggregate(
     edge_bool_vec       = [false for i in 1:length(edges)]
     edge_bool_avg_index = Dict{Tuple{T, T}, Vector{T}}()
     new_edge_data       = fill(0, (0, length(edge_attributes)))
+
+    removed_edge_bool_vec = [false for i in 1:length(edges)]
 
     for i in 1:length(nodes)
         node_name_mapping[node_map[nodes[i]]] = nodes[i]
@@ -532,6 +568,10 @@ function aggregate(
                     end
                 end
             end
+        else
+            if save_agg_edge_data
+                removed_edge_bool_vec[i] = true
+            end
         end
     end
 
@@ -548,6 +588,44 @@ function aggregate(
         new_dg.edge_data.attributes    = copy(edge_attributes)
         new_dg.edge_data.attribute_map = copy(edge_attribute_map)
         new_dg.edge_data.data          = copy(new_edge_data)
+
+        if save_agg_edge_data
+            new_node_data = new_dg.node_data.data
+            new_node_attributes = new_dg.node_data.attributes
+            new_node_attribute_map = new_dg.node_data.attribute_map
+            if length(node_attributes) > 0
+                edge_data_to_avg = edge_data[removed_edge_bool_vec, :]
+                if length(node_attributes_to_add) > 0
+                    attributes_to_add = node_attributes_to_add
+                else
+                    attributes_to_add = edge_attributes
+                end
+                for j in 1:length(attributes_to_add)
+                    push!(new_node_attributes, attributes_to_add[j])
+                    new_node_attribute_map[attributes_to_add[j]] = length(new_node_attributes)
+                end
+                data_to_add = fill(agg_edge_val, (length(new_nodes), length(edge_attributes)))
+                data_to_add[length(new_nodes), :] .= agg_edge_fn(edge_data_to_avg)
+                old_data = new_node_data
+                new_dg.node_data.data = hcat(old_data, data_to_add)
+            else
+                edge_data_to_avg = edge_data[removed_edge_bool_vec, :]
+                if length(node_attributes_to_add) > 0
+                    attributes_to_add = node_attributes_to_add
+                else
+                    attributes_to_add = edge_attributes
+                end
+                new_dg.node_data.attributes = attributes_to_add
+                new_node_attribute_map = new_dg.node_data.attribute_map
+                for j in 1:length(attributes_to_add)
+                    new_node_attribute_map[attributes_to_add[j]] = j
+                end
+                data_to_add = fill(agg_edge_val, (length(new_nodes), length(edge_attributes)))
+                data_to_add[length(new_nodes), :] .= agg_edge_fn(edge_data_to_avg)
+                old_data = new_node_data
+                new_dg.node_data.data = hcat(old_data, data_to_add)
+            end
+        end
     end
 
     simple_digraph = Graphs.SimpleDiGraph(T(length(new_edges)), fadjlist, badjlist)
