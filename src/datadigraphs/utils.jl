@@ -1,12 +1,12 @@
 """
     filter_nodes(datadigraph, filter_value, attribute = dg.node_data.attributes[1]; fn = isless)
 
-Removes the nodes of the graph whose weight value of `attribute` is greater than the given
-`filter_value`. If `attribute` is not specified, this defaults to the first attribute within
-the DataGraph's `NodeData`.
+Removes the nodes of the graph whose data on `attribute` is does not meet the criteria of `fn`
+with respect to `filter_value`. If `attribute` is not specified, this defaults to the first
+attribute within the DataDiGraph's `NodeData`.
 
-`fn` is a function that takes an input of two scalar values and is broadcast to the data vector.
-For example, isless, isgreater, isequal
+`fn` is a function that takes an input of a node's data on attribute and the `filter_value`
+and returns a true or false
 """
 function filter_nodes(
     dg::DataDiGraph,
@@ -27,7 +27,7 @@ function filter_nodes(
     edges              = dg.edges
 
     if length(node_attributes) == 0
-        error("No node weights are defined")
+        error("No node data are defined")
     end
 
     T = eltype(dg)
@@ -107,12 +107,12 @@ end
 """
     filter_edges(datadigraph, filter_value, attribute = dg.edge-data.attributes[1]; fn = isless)
 
-Removes the edges of the graph whose weight value of `attribute` is greater than the given
-`filter_value`. If `attribute` is not specified, this defaults to the first attribute within
-the DataGraph's `EdgeData`.
+Removes the edges of the graph whose data on `attribute` is does not meet the criteria of `fn`
+with respect to `filter_value`. If `attribute` is not specified, this defaults to the first
+attribute within the DataDiGraph's `EdgeData`.
 
-`fn` is a function that takes an input of two scalar values and is broadcast to the data vector.
-For example, isless, isgreater, isequal
+`fn` is a function that takes an input of a edge's data on attribute and the `filter_value`
+and returns a true or false
 """
 function filter_edges(
     dg::DataDiGraph,
@@ -132,7 +132,7 @@ function filter_edges(
     edge_attribute_map = dg.edge_data.attribute_map
 
     if length(edge_attributes) == 0
-        error("No node weights are defined")
+        error("No edge data are defined")
     end
 
     T = eltype(dg)
@@ -622,7 +622,7 @@ function aggregate(
                 end
                 data_to_add = fill(agg_edge_val, (length(new_nodes), length(edge_attributes)))
                 data_to_add[length(new_nodes), :] .= agg_edge_fn(edge_data_to_avg)
-                old_data = new_node_data
+                old_data = zeros(T1, (length(new_nodes), 0))
                 new_dg.node_data.data = hcat(old_data, data_to_add)
             end
         end

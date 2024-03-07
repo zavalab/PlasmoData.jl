@@ -52,18 +52,6 @@ agg_graph = aggregate(dg, [1, 5], "new_node")
     @test_throws ErrorException aggregate(dg, [1,5], 6)
 end
 
-agg_graph = aggregate(dg, [1, 5], "new_node", save_agg_edge_data = true, node_attributes_to_add = ["weight2"])
-
-@testset "aggregate test 2" begin
-    @test agg_graph.node_data.attributes == ["weight", "weight2"]
-    @test length(agg_graph.node_data.attribute_map) == 2
-    @test get_node_data(agg_graph, "new_node", "weight2") == 2
-    @test get_node_data(agg_graph, 2, "weight2") == 0
-    @test_throws ErrorException agg_graph = aggregate(dg, [1, 5], "new_node", save_agg_edge_data = true)
-    @test_throws ErrorException agg_graph = aggregate(dg, [1, 5], "new_node", save_agg_edge_data = true, node_attributes_to_add = ["weight"])
-    @test_throws ErrorException agg_graph = aggregate(dg, [1, 5], "new_node", save_agg_edge_data = true, node_attributes_to_add = ["weight", "weight2"])
-end
-
 remove_node!(dg, 2)
 
 @testset "remove_node! test" begin
@@ -101,4 +89,29 @@ remove_edge!(dg, (1, 3))
     @test get_edge_data(dg)[:] == [1.0, 2.0, 2.0]
     @test_throws ErrorException remove_edge!(dg, 1, 2)
     @test_throws ErrorException remove_edge!(dg, 1, 6)
+end
+
+dg = DataDiGraph()
+for i in 1:length(nodes)
+    add_node!(dg, nodes[i])
+end
+
+for i in 1:length(edges)
+    PlasmoData.add_edge!(dg, edges[i])
+    add_edge_data!(dg, edges[i], edge_data[i])
+end
+
+agg_graph = aggregate(dg, [1, 5], "new_node", save_agg_edge_data = true, node_attributes_to_add = ["weight2"])
+agg_graph2 = aggregate(dg, [1, 5], "new_node", save_agg_edge_data = true)
+
+@testset "aggregate test 2" begin
+    @test agg_graph.node_data.attributes == ["weight2"]
+    @test length(agg_graph.node_data.attribute_map) == 1
+    @test get_node_data(agg_graph, "new_node", "weight2") == 2
+    @test get_node_data(agg_graph, 2, "weight2") == 0
+
+    @test agg_graph2.node_data.attributes == ["weight"]
+    @test length(agg_graph2.node_data.attribute_map) == 1
+    @test get_node_data(agg_graph2, "new_node", "weight") == 2
+    @test get_node_data(agg_graph2, 2, "weight") == 0
 end

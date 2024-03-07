@@ -169,6 +169,7 @@ agg_graph = aggregate(dg, [(2, 2), (2, 3)], "agg_node")
     @test test_edge_exists(agg_graph, (2, 1), "agg_node")
     @test test_edge_exists(agg_graph, (3, 2), "agg_node")
     @test test_edge_exists(agg_graph, (3, 3), "agg_node")
+    @test_throws ErrorException aggregate(dg, ["a", "b"], "agg_node")
 end
 
 
