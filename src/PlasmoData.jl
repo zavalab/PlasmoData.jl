@@ -5,6 +5,8 @@ using SparseArrays
 using Statistics
 using LinearAlgebra
 
+import Graphs: add_edge!
+
 export DataGraph,
     DataDiGraph,
     add_node!,
