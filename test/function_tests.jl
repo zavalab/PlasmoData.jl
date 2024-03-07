@@ -13,7 +13,7 @@ for i in 1:length(nodes)
 end
 
 for i in 1:length(edges)
-    PlasmoData.add_edge!(ddg, edges[i])
+    add_edge!(ddg, edges[i])
     add_edge_data!(ddg, edges[i], edge_data[i])
 end
 

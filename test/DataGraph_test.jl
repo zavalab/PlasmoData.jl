@@ -21,7 +21,7 @@ function build_datagraph(nodes, edges)
         add_node!(dg, i)
     end
     for (i, j) in edges
-        PlasmoData.add_edge!(dg, i, j)
+        add_edge!(dg, i, j)
     end
 
     return dg
@@ -108,7 +108,7 @@ end
 # Test add_edge! function 1
 
 for (i, j) in edges
-    PlasmoData.add_edge!(dg, i, j)
+    add_edge!(dg, i, j)
 end
 
 @testset "add_edge! test" begin
@@ -147,7 +147,7 @@ for i in nodes
 end
 
 for i in edges
-    PlasmoData.add_edge!(dg, i)
+    add_edge!(dg, i)
 end
 
 @testset "add_edge! test" begin
