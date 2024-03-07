@@ -2,7 +2,7 @@ using Revise
 using PlasmoData, Graphs
 using JLD, LinearAlgebra
 using Plots, Statistics
-using DataGraphPlots
+using PlasmoDataPlots
 
 # Data for this example comes from Alex Smith's paper on the Euler Characteristic:
 # https://doi.org/10.1016/j.compchemeng.2021.107463

@@ -1,6 +1,6 @@
 using Revise
 using PlasmoData, Graphs
-using DataGraphPlots
+using PlasmoDataPlots
 
 dg = DataGraph()
 
@@ -28,4 +28,4 @@ add_edge_data!(dg, "node4", 1, 1.0, "weight")
 add_edge_data!(dg, :node5, 2, -.00001, "weight")
 add_edge_data!(dg, 3, "node4", 1, "weight")
 
-DataGraphPlots.plot_graph(dg; xdim = 400, ydim = 400)
+PlasmoDataPlots.plot_graph(dg; xdim = 400, ydim = 400)
