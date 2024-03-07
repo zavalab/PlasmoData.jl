@@ -8,6 +8,7 @@ using LinearAlgebra
 export DataGraph,
     DataDiGraph,
     add_node!,
+    add_edge!,
     add_node_data!,
     add_edge_data!,
     adjacency_matrix,
