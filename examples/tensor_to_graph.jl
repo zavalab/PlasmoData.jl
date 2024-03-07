@@ -1,7 +1,7 @@
 using Revise
 using PlasmoData, Graphs
 using Statistics, DelimitedFiles
-using DataGraphPlots
+using PlasmoDataPlots
 
 abc = rand(10, 4, 5)
 

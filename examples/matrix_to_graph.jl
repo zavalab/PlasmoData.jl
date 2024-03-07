@@ -1,6 +1,6 @@
 using Revise
 using PlasmoData, Graphs
-using DataGraphPlots
+using PlasmoDataPlots
 
 mat = rand(10, 10)
 
