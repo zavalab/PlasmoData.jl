@@ -1,7 +1,7 @@
 name = "PlasmoData"
 uuid = "18473d7d-a938-4be0-a189-2b040dfe6be7"
 authors = ["dlcole3 <dlcole3@wisc.edu> and contributors"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
