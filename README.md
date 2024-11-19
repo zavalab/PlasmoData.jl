@@ -7,7 +7,7 @@
 
 PlasmoData.jl is a package for [Julia](https://julialang.org/) designed for representing and modeling data as graphs and for building graph models that contain large amounts of data on the nodes or edges of the graph. This package also has an accompanying package [PlasmoDataPlots.jl](https://github.com/zavalab/PlasmoDataPlots.jl) which can be used for plotting the graphs. 
 
-PlasmoData.jl is built on the abstraction called a `DataGraph`. The manuscript ["PlasmoData.jl -- A Julia Framework for Modeling and Analyzing Complex Data as Graphs"](https://arxiv.org/abs/2401.11404) details the abstraction and this package.
+PlasmoData.jl is built on the abstraction called a `DataGraph`. The manuscript ["PlasmoData.jl -- A Julia Framework for Modeling and Analyzing Complex Data as Graphs"](https://www.sciencedirect.com/science/article/pii/S0098135424000978) details the abstraction and this package.
 
 ## Bug Reports and Support
 
@@ -102,3 +102,20 @@ tensor_graph = tensor_to_graph(random_tensor)
 ## Further Examples
 
 To see additional examples of how PlasmoData.jl can be used, please see the [examples](https://github.com/zavalab/PlasmoData.jl/tree/main/examples) directory within this repository.
+
+## Citing PlasmoData.jl
+
+If you find PlasmoData.jl useful for your work, you may cite the [manuscript](https://www.sciencedirect.com/science/article/pii/S0098135424000978) as: 
+```
+@article{cole2024plasmodata,
+  title={PlasmoData. jl—A Julia framework for modeling and analyzing complex data as graphs},
+  author={Cole, David L and Zavala, Victor M},
+  journal={Computers \& Chemical Engineering},
+  volume={185},
+  pages={108679},
+  year={2024},
+  publisher={Elsevier},
+  doi = {10.1016/j.compchemeng.2024.108679}
+}
+```
+There is also a freely-available preprint available [here](https://arxiv.org/abs/2401.11404)
